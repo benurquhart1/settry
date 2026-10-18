@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settry</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <pattern id="stripe-red" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1.5" height="4" fill="#d22"/></pattern>
+      <pattern id="stripe-green" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1.5" height="4" fill="#1a1"/></pattern>
+      <pattern id="stripe-blue" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1.5" height="4" fill="#22c"/></pattern>
+    </defs>
+  </svg>
+  <h1>Settry</h1>
+  <p id="info"></p>
+  <div id="board"></div>
+  <p id="msg"></p>
+  <div class="actions">
+    <button id="play">Play set</button>
+    <button id="discard">Discard</button>
+    <button id="new">New run</button>
+  </div>
+
+  <script src="data/config.js"></script>
+  <script src="data/jokers.js"></script>
+  <script src="js/deck.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
