@@ -80,10 +80,11 @@ const Jokers = {
 
   // Pick a random joker using the rarity odds, with one of the game's seeded random() streams.
   // Skips jokers in `exclude`, locked ones (unless ignoreUnlocks) and ones with no effect yet.
-  roll(random, exclude = []) {
+  // `only` limits the rarities (still weighted by their drop rates), e.g. ["rare", "unique"].
+  roll(random, exclude = [], only = null) {
     const rarities = window.SETTRY_JOKER_RARITIES;
     const pool = window.SETTRY_JOKERS.filter((j) => (j.unlocked || window.SETTRY_CONFIG.ignoreUnlocks) &&
-      j.effect.type !== "none" && !exclude.includes(j.id));
+      j.effect.type !== "none" && !exclude.includes(j.id) && (!only || only.includes(j.rarity)));
     const weighted = Object.entries(rarities).filter(([r, v]) => v.weight > 0 && pool.some((j) => j.rarity === r));
     if (!weighted.length) return null;
     let x = random() * weighted.reduce((t, [, v]) => t + v.weight, 0);

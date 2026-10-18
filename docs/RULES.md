@@ -68,6 +68,23 @@ A run is a ladder of **20 fights**, then endless mode (ben, 2026-10-18, moving a
 | Regular | two of: $3, $5, $8 (always different) | as shown | base × 1, × 1.3, × 1.7 |
 | Boss | two bosses with different modifiers | $10 | base × 2 (Giant × 1.5 more) |
 
+**Prizes** (ben, 2026-10-18). On top of the money, each regular opponent offers a prize from the reward pool for its place in the group of 4 (`rewardPools` in `data/fights.js`). The two opponents always offer different prizes. Winning opens the prize like a pack: choose from it, or skip.
+"Jokers" means jokers rolled with the normal drop rates. Card prizes have numbers 1 to 4. "Deck cards" only include cards your starting deck could have. Modified cards have a 30% chance (boosted cards: always) of one wild or enhancement, such as Steel.
+
+| Fight in the group | Prize pool (choose X of Y) |
+|--------------------|----------------------------|
+| 1st (fights 1, 5, 9, ...) | Common jokers 1 of 3 · Jokers 1 of 2 · Cards 2 of 5 (may be modified) · Charms 1 of 4 |
+| 2nd | Common jokers 1 of 4 · Jokers 1 of 3 · Uncommon jokers 1 of 2 · Deck cards 2 of 5 (may be modified) · Charms 2 of 3 |
+| 3rd | Common jokers 2 of 5 · Uncommon jokers 1 of 4 · Rare joker 1 of 1 (may be unique) · Jokers 1 of 5 · Charms 2 of 5 · Boosted deck cards 2 of 5 |
+| Boss | No prize: each boss instead sets a bonus for the shop that follows (`SETTRY_SHOP_MODIFIERS`) |
+
+| Boss shop bonus | Effect |
+|-----------------|--------|
+| Free packs | Packs in that shop cost $0. |
+| Free rerolls | Rerolls start at $0 (then +$1 each). |
+| Extra joker | 1 more joker for sale (also after rerolls). |
+| Extra packs | 2 more packs for sale. |
+
 Base targets (placeholders, scaling to be worked on): 100 for fights 1-4, 300 for 5-8, 800 for 9-12, 2000 for 13-16, 5000 for 17-20, then × 2.5 for each further group of 4 in endless mode.
 
 **Boss modifiers** (`SETTRY_BOSS_MODIFIERS`; usually only bosses have one, more to come from ben):

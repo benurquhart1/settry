@@ -118,3 +118,4 @@ dialog { max-width: 90vw; }
 .opponent.boss small { color: #c62828; }
 .opponent .modifier { color: #c62828; font-size: 14px; }
 .card.banned { filter: grayscale(1); opacity: 0.6; }
+.opponent .prize, .prize { color: #2e7d32; font-size: 14px; }

@@ -55,10 +55,15 @@ const Game = {
     const boss = Game.isBoss(n);
     const kinds = boss ? pickTwo(window.SETTRY_BOSS_MODIFIERS).map((modifier) => ({ ...f.boss, modifier }))
       : pickTwo(f.regular).sort((a, b) => a.reward - b.reward);
+    // Regular fights offer prizes from the pool for their place in the group; bosses offer shop modifiers.
+    const prizes = boss ? pickTwo(window.SETTRY_SHOP_MODIFIERS)
+      : pickTwo(f.rewardPools[(n - 1) % f.bossEvery]);
     s.choices = kinds.map((k, i) => ({
       name: names[i],
       boss,
       reward: k.reward,
+      prize: boss ? null : prizes[i],
+      shopModifier: boss ? prizes[i] : null,
       modifier: k.modifier || null,
       target: Math.round(Game.baseTarget(n) * k.targetMult * (k.modifier?.targetMult || 1)),
     }));
@@ -151,8 +156,8 @@ const Game = {
     if (Game.isBoss(n) && n < window.SETTRY_FIGHTS.count)
       s.jokerSlots = Math.min(window.SETTRY_CONFIG.jokerSlotsMax, s.jokerSlots + 1);
     if (n === window.SETTRY_FIGHTS.count && !s.endless) s.phase = "won";
-    else if (Game.isBoss(n)) Shop.open();
-    else Game.nextFight();
+    else if (Game.isBoss(n)) Shop.open(s.fight.shopModifier);
+    else Shop.openPack(s.fight.prize, "fight");
   },
 
   // After winning the run: keep going with endless fights, starting at the shop.
@@ -160,7 +165,7 @@ const Game = {
     const s = Game.state;
     if (s.phase !== "won") return;
     s.endless = true;
-    Shop.open();
+    Shop.open(s.fight.shopModifier);
   },
 
   // Lowest your money can go before you lose: Loan Shark's limit, otherwise $0.

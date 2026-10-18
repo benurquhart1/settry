@@ -85,7 +85,8 @@ function render() {
   const r = Game.roundInfo();
   const total = window.SETTRY_FIGHTS.count;
   const fight = s.endless ? `Endless fight ${s.fightNumber}` : `Fight ${s.fightNumber}/${total}`;
-  const where = s.phase === "shop" || s.phase === "pack" ? "Shop"
+  const where = s.phase === "pack" && s.pack.after === "fight" ? `Prize for beating ${r.name}`
+    : s.phase === "shop" || s.phase === "pack" ? "Shop"
     : s.phase === "choose" ? "Choose your opponent"
     : `vs ${r.name}${r.boss ? " (boss)" : ""} · Target ${r.target}`;
   $("status").innerHTML = `<b>${fight}</b> · ${where} · <b>${s.money < 0 ? `-$${-s.money}` : `$${s.money}`}</b> · Jokers ${s.jokers.length}/${s.jokerSlots} · Seed ${s.seed}`;
@@ -124,6 +125,8 @@ function renderChoose() {
       <h3>${c.name}${c.boss ? " <small>Boss</small>" : ""}</h3>
       <div>Target <b>${c.target}</b></div>
       <div>Reward <b>$${c.reward}</b></div>
+      ${c.prize ? `<div class="prize">Prize: <b>${c.prize.name}</b>, choose ${c.prize.picks} of ${c.prize.options}</div>` : ""}
+      ${c.shopModifier ? `<div class="prize">Shop bonus: <b>${c.shopModifier.name}</b>. ${c.shopModifier.text}</div>` : ""}
       ${c.modifier ? `<div class="modifier"><b>${c.modifier.name}:</b> ${c.modifier.text}</div>` : `<div class="hint">No modifier</div>`}
       <button data-choose="${i}" class="big">Fight</button></div>`).join("");
 }
@@ -247,13 +250,14 @@ function renderShop() {
       <div class="pack pack-${p.kind}${p.sold ? " sold" : ""}"><b>${p.name}</b>
         <span>Choose ${p.picks} of ${p.options} ${{ card: "cards to add to your deck", joker: "jokers", charm: "charms" }[p.kind]}</span></div>
       <button data-buy-pack="${i}" ${!p.sold && Game.canSpend(p.price) ? "" : "disabled"}>${p.sold ? "Opened" : `Buy $${p.price}`}</button></div>`).join("");
+  $("shop-note").textContent = s.shop.mod ? `Boss bonus: ${s.shop.mod.name}. ${s.shop.mod.text}` : "";
   $("reroll").textContent = `Reroll $${s.shop.rerollCost}`;
   $("reroll").disabled = !Game.canSpend(s.shop.rerollCost);
 }
 
 function renderPack() {
   const p = Game.state.pack;
-  $("pack-title").textContent = `${p.name}: choose ${p.picksLeft} more`;
+  $("pack-title").textContent = `${p.after === "fight" ? "Prize: " : ""}${p.name}: choose ${p.picksLeft} more`;
   $("pack-note").textContent = p.kind === "charm" && !Consumables.hasRoom()
     ? `Your ${window.SETTRY_CONFIG.consumableSlots} charm slots are full: use or sell one to take another.` : "";
   $("pack-options").innerHTML = p.options.map((o, n) => `<div class="offer">
@@ -261,7 +265,8 @@ function renderPack() {
         : o.charm ? charmHtml(Consumables.byId(o.charm), o.taken ? "sold" : "")
         : jokerHtml(Jokers.byId(o.joker), o.taken ? "sold" : "")}
       <button data-pick="${n}" ${Shop.canPick(n) ? "" : "disabled"}>${o.taken ? "Taken" : "Take"}</button>
-      ${o.card?.mods ? `<small>${o.card.mods.map((m) => window.SETTRY_MODIFIERS[m].name).join(", ")}</small>` : ""}
+      ${o.card?.mods || o.card?.enh ? `<small>${[...(o.card.mods || []).map((m) => window.SETTRY_MODIFIERS[m].name),
+        ...(o.card.enh ? [window.SETTRY_ENHANCEMENTS[o.card.enh].name] : [])].join(", ")}</small>` : ""}
       ${o.joker ? `<small>${rarityLabel(o.joker)}</small>` : ""}</div>`).join("");
 }
 
