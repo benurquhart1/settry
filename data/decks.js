@@ -10,4 +10,9 @@ window.SETTRY_DECKS = [
   { id: "diamonds", name: "Diamond deck", text: "Only diamonds.", size: 40, filter: { shape: "diamond" } },
   { id: "spades", name: "Spade deck", text: "Only spades.", size: 40, filter: { shape: "spade" } },
   { id: "clubs", name: "Club deck", text: "Only clubs.", size: 40, filter: { shape: "club" } },
+  { id: "solid", name: "Solid deck", text: "Only solid cards.", size: 40, filter: { shading: "solid" } },
+  { id: "shaded", name: "Shaded deck", text: "Only striped cards.", size: 40, filter: { shading: "striped" } },
+  { id: "empty", name: "Empty deck", text: "Only empty cards.", size: 40, filter: { shading: "empty" } },
+  { id: "checkered", name: "Checkered deck", text: "Only checkered cards.", size: 40, filter: { shading: "checkered" } },
+  { id: "freeForAll", name: "Free for all", text: "Any of the 256 cards.", size: 40, filter: {} },
 ];

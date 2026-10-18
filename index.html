@@ -17,20 +17,22 @@
     </div>
     <label class="seed">Seed <input id="seed" size="12" spellcheck="false"></label>
     <h3>Test jokers</h3>
-    <p class="hint">Pick up to 5 to start with. They apply left to right in the order picked.</p>
+    <p class="hint">Optional: start the run already holding up to 5 of these. They apply left to right in the order picked.</p>
     <div id="joker-pick" class="joker-row"></div>
     <button id="start" class="big">Start game</button>
     <p><a href="gallery.html">See all cards</a> · <a href="jokers.html">See all jokers</a></p>
   </section>
 
   <section id="game" hidden>
-    <div class="table">
+    <div id="status"></div>
+    <div id="jokers" class="joker-row small"></div>
+
+    <div id="round-view" class="table">
       <div class="play-area">
         <div id="picked"></div>
         <div id="board"></div>
       </div>
       <aside>
-        <div id="jokers" class="joker-row small"></div>
         <div id="hand-box"></div>
         <p id="info"></p>
         <p id="msg"></p>
@@ -41,6 +43,35 @@
           <button id="menu-btn">Menu</button>
         </div>
       </aside>
+    </div>
+
+    <div id="cashout-view" class="panel" hidden>
+      <h2>Round won</h2>
+      <div id="cashout-lines"></div>
+      <button id="cash-out" class="big">Cash out</button>
+    </div>
+
+    <div id="shop-view" class="panel" hidden>
+      <h2>Shop</h2>
+      <div id="shop-jokers" class="offers"></div>
+      <div id="shop-packs" class="offers"></div>
+      <div class="actions">
+        <button id="reroll">Reroll</button>
+        <button id="next-round" class="big">Next round</button>
+        <button id="view-deck-2">View deck</button>
+      </div>
+    </div>
+
+    <div id="pack-view" class="panel" hidden>
+      <h2 id="pack-title"></h2>
+      <div id="pack-options" class="offers"></div>
+      <button id="skip-pack">Skip</button>
+    </div>
+
+    <div id="end-view" class="panel" hidden>
+      <h2 id="end-title"></h2>
+      <p id="end-text"></p>
+      <button id="end-menu" class="big">Back to menu</button>
     </div>
   </section>
 
@@ -69,6 +100,8 @@
   <script src="js/jokers.js"></script>
   <script src="js/hands.js"></script>
   <script src="js/cards.js"></script>
+  <script src="data/packs.js"></script>
+  <script src="js/shop.js"></script>
   <script src="js/game.js"></script>
   <script src="js/ui.js"></script>
 </body>

@@ -52,16 +52,46 @@ A set of 4 is a full set; a set of 3 is three cards that follow the same rule.
 
 More hands, including a set of 5, are to come.
 
-## The run (planned, not built yet)
+## The run
 
-A run plays like Balatro (ben, 2026-10-18):
+A run plays like Balatro (ben, 2026-10-18). Numbers live in `data/config.js`.
 
-- The run is a series of **antes**. Each ante has rounds you beat by scoring past a target.
-- Between rounds there is a **shop**.
-- Each ante ends with a **boss** round that plays a bit differently.
-- Beating a round also gives a **reward** of its own, on top of reaching the shop.
+- You start with **$5** and your starting deck. Your deck carries over from round to round, and it's fully reshuffled at the start of each round.
+- The run has **8 antes**, each with **3 rounds**: small, big and boss. Beat the boss of ante 8 to win the run. Fail to reach a round's target and the run is over.
 
-Still to decide: the targets per ante, what rewards and the shop offer, and the boss rules.
+| Round | Target | Reward |
+|-------|--------|--------|
+| Small | ante target × 1 | $3 |
+| Big | ante target × 1.5 | $5 |
+| Boss | ante target × 2 | $8 |
+
+Ante targets (placeholders, to tune): 100, 250, 600, 1500, 3500, 6500, 11500, 16500.
+
+When you win a round you also get **$1 for each unused hand**, plus **interest of $1 for every $5 you hold, up to $5** (both like Balatro).
+Boss rounds don't have special rules yet.
+
+## The shop
+
+After each round you cash out and visit the shop (`js/shop.js`, packs in `data/packs.js`).
+
+- **2 jokers** for sale (the Shopkeeper joker adds a third). Prices: common $4, uncommon $6, rare $10, unique $16. You can hold 5 jokers.
+- **2 packs** for sale, picked at random by how common each pack is. Buying a pack opens it: choose from its options or skip.
+- **Reroll** replaces the jokers for sale (not the packs). The first reroll in each shop costs $4, then $1 more each time.
+- **Sell** a joker for half its price, rounded down (at least $1), while in the shop.
+
+| Pack | Price | Contents |
+|------|-------|----------|
+| Standard | $4 | Choose 1 of 3 cards to add to your deck |
+| Jumbo Standard | $6 | Choose 1 of 5 cards |
+| Mega Standard | $8 | Choose 2 of 5 cards |
+| Buffoon | $4 | Choose 1 of 2 jokers |
+| Jumbo Buffoon | $6 | Choose 1 of 4 jokers |
+| Mega Buffoon | $8 | Choose 2 of 4 jokers |
+
+Pack cards can be any of the 256 cards, and each has a 25% chance of one wild modification.
+Jokers in the shop and in packs use the joker drop rates. Until saves exist, locked jokers can still show up (`ignoreUnlocks`), but TBD jokers never do.
+
+The seed drives separate streams for building the deck, shuffling, the shop, packs and luck rolls, so rerolling the shop never changes which cards you draw.
 
 ## Card modifications
 
@@ -90,6 +120,11 @@ Pick a starting deck on the start menu (arrows to switch). Decks live in `data/d
 | Diamond | 40 cards drawn from the 64 diamonds |
 | Spade | 40 cards drawn from the 64 spades |
 | Club | 40 cards drawn from the 64 clubs |
+| Solid | 40 cards drawn from the 64 solid cards |
+| Shaded | 40 cards drawn from the 64 striped cards |
+| Empty | 40 cards drawn from the 64 empty cards |
+| Checkered | 40 cards drawn from the 64 checkered cards |
+| Free for all | 40 cards drawn from all 256 |
 
 Cards are drawn **with replacement**, so a deck can hold several copies of the same card.
 
@@ -103,14 +138,13 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 | Board | 16 cards in a 4x4 grid | `boardSize` |
 | Play size | 2 to 4 cards (5 with the Fifth Card joker) | `minPlay`, `maxPlay` |
 | Hands | 4 per round | `plays` |
-| Target | 150 points (placeholder) | `roundTarget` |
 | Discards | 2 per round, up to 4 cards each | `discards`, `maxDiscardSize` |
 
 1. Your deck is shuffled (by the seed) into a draw pile, and 16 cards are dealt face up.
 2. Select 2 to 4 cards (5 with Fifth Card). If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
 3. Or select 1 to 4 cards and press **Discard** to swap them.
 4. Played and discarded cards are replaced from the draw pile. When the pile is empty, their spots stay empty.
-5. Reach the target within 4 hands to win the round.
+5. Reach the round's target within 4 hands to win it.
 
 **View deck** shows every card in your deck, sortable by color, number, shape or shading. Faded cards are used, outlined ones are on the board.
 
@@ -119,7 +153,7 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 Jokers live in `data/jokers.js` (effects are data; `js/jokers.js` applies them). `jokers.html` shows every joker card.
 A joker card has art on the top half, its name in the middle and a text box at the bottom. Names and art are placeholders.
 You can hold up to 5 (`jokerSlots`). Scoring jokers apply **left to right**, after the cards have added their points.
-For now you pick test jokers on the start menu; shops and drops come later.
+Buy them in the shop or find them in Buffoon packs. You can also pick test jokers on the start menu to start a run with.
 
 **Drop rates** (by rarity): common 60%, uncommon 25%, rare 12%, unique 3%. Legendary jokers never drop.
 Many jokers will need to be unlocked first (`unlocked` in the data; all are unlocked for now).
@@ -137,6 +171,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Uncommon | Big Table | +2 cards on the board. |
 | Uncommon | Odd One Out | Earn $1 for each difference in the hand. |
 | Uncommon | Birds of a Feather | Earn $1 for each match in the hand. |
+| Uncommon | Shopkeeper | +1 joker for sale in the shop. |
 | Uncommon | Numberfile | +1 mult for each different number played. |
 | Rare | Kaleidoscope | Multiply mult by the number of differences in the hand. |
 | Rare | Mirror | Multiply mult by the number of matches in the hand. No matches scores 0. |
@@ -164,7 +199,7 @@ A wild card counts as every color (or suit) for these jokers.
 
 Legendary jokers: to come.
 
-Money ($) is tracked but has no use yet. Unlocks are listed but not tracked yet: that needs user accounts and saves (see `docs/TODO.md`). The test picker on the start menu offers every joker, locked or not.
+Unlocks are listed but not tracked yet: that needs user accounts and saves (see `docs/TODO.md`). The test picker on the start menu offers every joker, locked or not.
 
 ## Open questions
 

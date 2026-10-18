@@ -13,6 +13,7 @@ Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 - `docs/TODO.md`: things to come back to.
 - `data/config.js`: the numbers (deck size, board size, sets to win, discards).
 - `data/decks.js`: starting decks.
+- `data/packs.js`: shop packs.
 - `data/hands.js`: hands you can play and what they score.
 - `data/jokers.js`: jokers, rarities and drop rates. `jokers.html` shows them.
 - `js/jokers.js`: applying joker effects.
@@ -22,5 +23,6 @@ Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 - `js/cards.js`: how a card is drawn.
 - `js/rng.js`: seeded randomness.
 - `js/hands.js`: working out which hand a play makes.
-- `js/game.js`: round state and rules.
+- `js/shop.js`: the shop.
+- `js/game.js`: run and round state and rules.
 - `js/ui.js`, `index.html`, `style.css`: the plain look.

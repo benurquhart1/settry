@@ -18,6 +18,16 @@ const Deck = {
     return Array.from({ length: deck.size }, (_, i) => ({ ...pool[Rng.int(random, pool.length)], uid: i }));
   },
 
+  // A shuffled copy, using a seeded random().
+  shuffle(cards, random) {
+    const c = cards.slice();
+    for (let i = c.length - 1; i > 0; i--) {
+      const j = Rng.int(random, i + 1);
+      [c[i], c[j]] = [c[j], c[i]];
+    }
+    return c;
+  },
+
   // A set (3 or 4 cards): for each attribute the cards are all the same or all different
   // (or, with allowPairs, split into equal pairs such as A A B B).
   // A wild card (see data/modifiers.js) counts as whatever value its attribute needs.

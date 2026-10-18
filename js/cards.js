@@ -76,13 +76,14 @@ function cardSvg(card) {
 }
 
 // A joker card: art on the top half, name in the middle, description at the bottom.
-function jokerHtml(joker, extraClass = "", showUnlock = false) {
+function jokerHtml(joker, extraClass = "", showUnlock = false, extraHtml = "") {
   const rarity = window.SETTRY_JOKER_RARITIES[joker.rarity];
   return `<div class="joker ${extraClass}" data-joker="${joker.id}" style="--rarity:${rarity.color}" title="${rarity.name}">
     <div class="joker-art"><span>${joker.art}</span></div>
     <div class="joker-name">${joker.name}</div>
     <div class="joker-text">${joker.text}</div>
     ${showUnlock && !joker.unlocked ? `<div class="joker-unlock">Unlock: ${joker.unlock}</div>` : ""}
+    ${extraHtml}
   </div>`;
 }
 

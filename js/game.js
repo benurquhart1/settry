@@ -2,32 +2,91 @@
 const Game = {
   state: null,
 
-  // Start a round with a deck from data/decks.js and a seed for every random choice.
-  start(deckDef, seed, jokers = []) {
-    const setting = (name) => Jokers.setting(name, jokers);
-    const random = Rng.create(seed);
-    const runDeck = Deck.runDeck(deckDef, random);
-    const pile = runDeck.slice();
+  // Start a run with a deck from data/decks.js, a seed, and any test jokers.
+  // Each kind of randomness has its own seeded stream, so (for example) rerolling the shop
+  // never changes which cards you draw.
+  newRun(deckDef, seed, jokers = []) {
+    const rng = {};
+    for (const stream of ["deck", "shuffle", "shop", "pack", "luck"]) rng[stream] = Rng.create(`${seed}/${stream}`);
+    const runDeck = Deck.runDeck(deckDef, rng.deck);
     Game.state = {
       seed,
       deckDef,
-      random,                                 // use for anything random later (rewards, shop)
-      runDeck,                                // every card in this run's deck
-      pile,                                   // draw pile, top first
-      board: pile.splice(0, setting("boardSize")),   // face-up cards; empty spots are null
-      selected: [],                           // indices into board
-      used: new Set(),                        // uids of cards played or discarded
+      rng,
+      runDeck,                                // every card in your deck; carries over between rounds
+      nextUid: runDeck.length,                // uid for the next card added to the deck
       jokers,                                 // held joker ids, applied left to right
+      money: window.SETTRY_CONFIG.startMoney,
+      ante: 1,
+      roundIndex: 0,                          // 0 small, 1 big, 2 boss (see config.rounds)
+      timesPlayed: {},                        // hand id -> times played this run
+      phase: "round",                         // round, cashout, shop, pack, lost, won
+    };
+    Game.startRound();
+  },
+
+  roundInfo() {
+    const cfg = window.SETTRY_CONFIG;
+    const s = Game.state;
+    const r = cfg.rounds[s.roundIndex];
+    return { ...r, target: Math.round(cfg.anteTargets[s.ante - 1] * r.targetMult) };
+  },
+
+  // Shuffle the whole deck into a fresh draw pile and deal the board.
+  startRound() {
+    const s = Game.state;
+    const setting = (name) => Jokers.setting(name, s.jokers);
+    s.pile = Deck.shuffle(s.runDeck, s.rng.shuffle);   // draw pile, top first
+    Object.assign(s, {
+      phase: "round",
+      board: s.pile.splice(0, setting("boardSize")),   // face-up cards; empty spots are null
+      selected: [],                           // indices into board, in the order clicked
+      used: new Set(),                        // uids of cards played or discarded this round
       maxPlay: setting("maxPlay"),
-      timesPlayed: {},                        // hand id -> times played this game
-      money: 0,
-      firstDiscardDone: false,                // for jokers that act on the round's first discard
       score: 0,
+      target: Game.roundInfo().target,
       playsLeft: setting("plays"),
       discardsLeft: setting("discards"),
+      firstDiscardDone: false,                // for jokers that act on the round's first discard
       message: "",
-      over: null,                             // null, "won" or "lost"
-    };
+    });
+  },
+
+  // What winning the round pays: the round's reward, $1 per unused hand, and interest.
+  earnings() {
+    const cfg = window.SETTRY_CONFIG;
+    const s = Game.state;
+    const lines = [
+      { label: `${Game.roundInfo().name} beaten`, amount: Game.roundInfo().reward },
+      { label: `${s.playsLeft} unused hand${s.playsLeft === 1 ? "" : "s"}`, amount: s.playsLeft * cfg.moneyPerHandLeft },
+      { label: `Interest ($1 per $${cfg.interestPer}, up to $${cfg.interestMax})`,
+        amount: Math.min(cfg.interestMax, Math.floor(s.money / cfg.interestPer)) },
+    ].filter((l) => l.amount > 0);
+    return { lines, total: lines.reduce((t, l) => t + l.amount, 0) };
+  },
+
+  cashOut() {
+    const s = Game.state;
+    if (s.phase !== "cashout") return;
+    s.money += Game.earnings().total;
+    Shop.open();
+  },
+
+  // Leave the shop: on to the next round, or the next ante after the boss.
+  nextRound() {
+    const s = Game.state;
+    const cfg = window.SETTRY_CONFIG;
+    s.roundIndex++;
+    if (s.roundIndex >= cfg.rounds.length) { s.roundIndex = 0; s.ante++; }
+    Game.startRound();
+  },
+
+  sellJoker(k) {
+    const s = Game.state;
+    const id = s.jokers[k];
+    if (!id || s.phase === "round") return;
+    s.money += Jokers.sellPrice(id);
+    s.jokers.splice(k, 1);
   },
 
   selectedCards() {
@@ -36,7 +95,7 @@ const Game = {
 
   toggle(i) {
     const s = Game.state;
-    if (s.over || !s.board[i]) return;
+    if (s.phase !== "round" || !s.board[i]) return;
     const at = s.selected.indexOf(i);
     if (at >= 0) s.selected.splice(at, 1);
     else if (s.selected.length < Math.max(s.maxPlay, window.SETTRY_CONFIG.maxDiscardSize)) s.selected.push(i);
@@ -53,13 +112,13 @@ const Game = {
   },
 
   canPlay() {
-    return !Game.state.over && Game.state.playsLeft > 0 && !!Game.selectedHand();
+    return Game.state.phase === "round" && Game.state.playsLeft > 0 && !!Game.selectedHand();
   },
 
   canDiscard() {
     const s = Game.state;
     const n = s.selected.length;
-    return !s.over && s.discardsLeft > 0 && n >= 1 && n <= window.SETTRY_CONFIG.maxDiscardSize;
+    return s.phase === "round" && s.discardsLeft > 0 && n >= 1 && n <= window.SETTRY_CONFIG.maxDiscardSize;
   },
 
   // Scores the selected cards for real, rolling any chance effects with the seed.
@@ -69,7 +128,7 @@ const Game = {
     if (!Game.canPlay()) return null;
     const preview = Game.selectedHand();
     const scored = Hands.score(Game.selectedCards(), window.SETTRY_HANDS[preview.id], preview.id,
-      { jokers: s.jokers, timesPlayed: s.timesPlayed, random: s.random });
+      { jokers: s.jokers, timesPlayed: s.timesPlayed, random: s.rng.luck });
     return { ...preview, ...scored };
   },
 
@@ -95,7 +154,7 @@ const Game = {
       const card = s.board[s.selected[0]];
       for (const j of Jokers.has(s.jokers, "singleDiscard")) {
         if (j.effect.action === "duplicate") {
-          const copy = { ...card, uid: Math.max(...s.runDeck.map((c) => c.uid)) + 1 };
+          const copy = { ...card, uid: s.nextUid++ };
           s.runDeck.push(copy);
           Game.shuffleIntoPile([copy]);
           s.message += ` ${j.name} added a copy to your deck.`;
@@ -126,12 +185,14 @@ const Game = {
   // Put cards into the draw pile at random (seeded) places.
   shuffleIntoPile(cards) {
     const s = Game.state;
-    for (const c of cards) s.pile.splice(Rng.int(s.random, s.pile.length + 1), 0, c);
+    for (const c of cards) s.pile.splice(Rng.int(s.rng.shuffle, s.pile.length + 1), 0, c);
   },
 
   checkEnd() {
     const s = Game.state;
-    if (s.score >= window.SETTRY_CONFIG.roundTarget) s.over = "won";
-    else if (s.playsLeft === 0) s.over = "lost";
+    if (s.score >= s.target) {
+      const last = s.ante === window.SETTRY_CONFIG.antes && s.roundIndex === window.SETTRY_CONFIG.rounds.length - 1;
+      s.phase = last ? "won" : "cashout";
+    } else if (s.playsLeft === 0) s.phase = "lost";
   },
 };

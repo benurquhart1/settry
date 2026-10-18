@@ -4,7 +4,7 @@ const Jokers = {
     return window.SETTRY_JOKERS.find((j) => j.id === id);
   },
 
-  // A round setting (plays, discards, boardSize, maxPlay) after "extra" jokers.
+  // A setting (plays, discards, boardSize, maxPlay, shopJokerSlots) after "extra" jokers.
   setting(name, jokerIds) {
     let value = window.SETTRY_CONFIG[name];
     for (const id of jokerIds) {
@@ -78,14 +78,26 @@ const Jokers = {
     return jokerIds.map(Jokers.byId).filter((j) => j.effect.type === type);
   },
 
-  // Pick a random unlocked joker using the drop rates, with the game's seeded random().
-  roll(random, ownedIds = []) {
+  // Pick a random joker using the rarity odds, with one of the game's seeded random() streams.
+  // Skips jokers in `exclude`, locked ones (unless ignoreUnlocks) and ones with no effect yet.
+  roll(random, exclude = []) {
     const rarities = window.SETTRY_JOKER_RARITIES;
-    const pool = window.SETTRY_JOKERS.filter((j) => j.unlocked && !ownedIds.includes(j.id));
+    const pool = window.SETTRY_JOKERS.filter((j) => (j.unlocked || window.SETTRY_CONFIG.ignoreUnlocks) &&
+      j.effect.type !== "none" && !exclude.includes(j.id));
     const weighted = Object.entries(rarities).filter(([r, v]) => v.weight > 0 && pool.some((j) => j.rarity === r));
+    if (!weighted.length) return null;
     let x = random() * weighted.reduce((t, [, v]) => t + v.weight, 0);
     const [rarity] = weighted.find(([, v]) => (x -= v.weight) < 0) || weighted[weighted.length - 1];
     const choices = pool.filter((j) => j.rarity === rarity);
     return choices[Rng.int(random, choices.length)];
+  },
+
+  price(id) {
+    return window.SETTRY_CONFIG.jokerPrices[Jokers.byId(id).rarity];
+  },
+
+  // Selling gives back half the price, rounded down, at least $1.
+  sellPrice(id) {
+    return Math.max(1, Math.floor(Jokers.price(id) / 2));
   },
 };

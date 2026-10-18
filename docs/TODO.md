@@ -8,5 +8,6 @@ Things ben asked to come back to later.
 - [ ] **Black, Spade, Heart and Club Joker** effects: TBD.
 - [ ] **Legendary jokers**: none yet.
 - [ ] **Set of 5**: ben will explain how it works.
-- [ ] **Run structure**: antes, score targets, shop, bosses and round rewards.
-- [ ] **Money**: tracked, but nothing uses it yet.
+- [ ] **Boss rounds**: special rules for each boss.
+- [ ] **Tune ante targets** once more jokers exist.
+- [ ] **Polka dot deck**: ben listed a polka dot deck; the 4th shading is checkered (polka dots mark wild shading), so it's a Checkered deck for now.

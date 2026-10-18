@@ -42,12 +42,13 @@ function showMenu() {
 $("prev-deck").onclick = () => { deckIndex = (deckIndex + decks.length - 1) % decks.length; renderMenu(); };
 $("next-deck").onclick = () => { deckIndex = (deckIndex + 1) % decks.length; renderMenu(); };
 $("start").onclick = () => {
-  Game.start(decks[deckIndex], $("seed").value.trim() || Rng.newSeed(), pickedJokers.slice());
+  Game.newRun(decks[deckIndex], $("seed").value.trim() || Rng.newSeed(), pickedJokers.slice());
   $("menu").hidden = true;
   $("game").hidden = false;
   render();
 };
 $("menu-btn").onclick = showMenu;
+$("end-menu").onclick = showMenu;
 
 // Round -----------------------------------------------------------------
 
@@ -71,13 +72,41 @@ function handBox(hand, shown) {
     <div class="hand-score"><span class="pts">${points}</span> × <span class="mult">${mult}</span>${total}</div>`;
 }
 
+// Draws whichever screen the run is on.
 function render() {
   const s = Game.state;
   const cfg = window.SETTRY_CONFIG;
+  const r = Game.roundInfo();
+  const where = s.phase === "shop" || s.phase === "pack" ? `Shop after the ${r.name.toLowerCase()}` : `${r.name} · Target ${r.target}`;
+  $("status").innerHTML = `<b>Ante ${s.ante}/${cfg.antes}</b> · ${where} · <b>$${s.money}</b> · Seed ${s.seed}`;
+  const selling = s.phase === "shop" || s.phase === "pack";
+  $("jokers").innerHTML = s.jokers.map((id, k) => `<div class="held">${jokerHtml(Jokers.byId(id))}` +
+    `${selling ? `<button class="sell" data-k="${k}">Sell $${Jokers.sellPrice(id)}</button>` : ""}</div>`).join("") ||
+    `<p class="hint">No jokers yet (${s.jokers.length}/${cfg.jokerSlots}).</p>`;
+  $("round-view").hidden = s.phase !== "round";
+  $("cashout-view").hidden = s.phase !== "cashout";
+  $("shop-view").hidden = s.phase !== "shop";
+  $("pack-view").hidden = s.phase !== "pack";
+  $("end-view").hidden = !(s.phase === "lost" || s.phase === "won");
+  if (s.phase === "round") renderRound();
+  if (s.phase === "cashout") renderCashout();
+  if (s.phase === "shop") renderShop();
+  if (s.phase === "pack") renderPack();
+  if (s.phase === "lost") {
+    $("end-title").textContent = "Run over";
+    $("end-text").textContent = `You scored ${s.score} of ${s.target} in the ${r.name.toLowerCase()} of ante ${s.ante}.`;
+  }
+  if (s.phase === "won") {
+    $("end-title").textContent = "You beat the run!";
+    $("end-text").textContent = `All ${cfg.antes} antes cleared with the ${s.deckDef.name.toLowerCase()}, finishing with $${s.money}.`;
+  }
+}
+
+function renderRound() {
+  const s = Game.state;
   const hand = Game.selectedHand();
 
   // Top row: the selected cards in the order clicked, with the points each adds.
-  $("jokers").innerHTML = s.jokers.map((id) => jokerHtml(Jokers.byId(id))).join("");
   const slots = Array.from({ length: s.maxPlay }, (_, n) => {
     const i = s.selected[n];
     if (i === undefined) return `<div class="card empty"></div>`;
@@ -93,11 +122,10 @@ function render() {
     .join("");
 
   $("hand-box").innerHTML = handBox(hand);
-  $("info").innerHTML = `Score <b>${s.score}</b> / ${cfg.roundTarget} · $${s.money}<br>
+  $("info").innerHTML = `Score <b>${s.score}</b> / ${s.target}<br>
     Hands left ${s.playsLeft} · Discards left ${s.discardsLeft}<br>
-    Draw pile ${s.pile.length} · Seed ${s.seed}`;
-  const over = s.over === "won" ? `You win with ${s.score}!` : s.over === "lost" ? `Out of hands at ${s.score}. You lose.` : "";
-  $("msg").textContent = over || s.message;
+    Draw pile ${s.pile.length}`;
+  $("msg").textContent = s.message;
   $("play").disabled = animating || !Game.canPlay();
   $("discard").disabled = animating || !Game.canDiscard();
   $("discard").textContent = `Discard (${s.discardsLeft})`;
@@ -147,6 +175,57 @@ $("play").onclick = async () => {
 };
 $("discard").onclick = () => { if (!animating) { Game.discard(); render(); } };
 
+// Cash out, shop and packs ---------------------------------------------
+
+function renderCashout() {
+  const e = Game.earnings();
+  $("cashout-lines").innerHTML = e.lines.map((l) => `<div class="line"><span>${l.label}</span><b>+$${l.amount}</b></div>`).join("") +
+    `<div class="line total"><span>Total</span><b>+$${e.total}</b></div>`;
+}
+
+function rarityLabel(id) {
+  return window.SETTRY_JOKER_RARITIES[Jokers.byId(id).rarity].name;
+}
+
+function renderShop() {
+  const s = Game.state;
+  $("shop-jokers").innerHTML = s.shop.jokers.map((o, i) => `<div class="offer">
+      ${jokerHtml(Jokers.byId(o.id), o.sold ? "sold" : "")}
+      <button data-buy-joker="${i}" ${Shop.canBuyJoker(i) ? "" : "disabled"}>${o.sold ? "Bought" : `Buy $${o.price}`}</button>
+      <small>${rarityLabel(o.id)}</small></div>`).join("");
+  $("shop-packs").innerHTML = s.shop.packs.map((p, i) => `<div class="offer">
+      <div class="pack ${p.kind}${p.sold ? " sold" : ""}"><b>${p.name}</b>
+        <span>Choose ${p.picks} of ${p.options} ${p.kind === "card" ? "cards to add to your deck" : "jokers"}</span></div>
+      <button data-buy-pack="${i}" ${!p.sold && s.money >= p.price ? "" : "disabled"}>${p.sold ? "Opened" : `Buy $${p.price}`}</button></div>`).join("");
+  $("reroll").textContent = `Reroll $${s.shop.rerollCost}`;
+  $("reroll").disabled = s.money < s.shop.rerollCost;
+}
+
+function renderPack() {
+  const p = Game.state.pack;
+  $("pack-title").textContent = `${p.name}: choose ${p.picksLeft} more`;
+  $("pack-options").innerHTML = p.options.map((o, n) => `<div class="offer">
+      ${o.card ? `<div class="card${o.taken ? " used" : ""}">${cardSvg(o.card)}</div>` : jokerHtml(Jokers.byId(o.joker), o.taken ? "sold" : "")}
+      <button data-pick="${n}" ${Shop.canPick(n) ? "" : "disabled"}>${o.taken ? "Taken" : "Take"}</button>
+      ${o.card?.mods ? `<small>${o.card.mods.map((m) => window.SETTRY_MODIFIERS[m].name).join(", ")}</small>` : ""}
+      ${o.joker ? `<small>${rarityLabel(o.joker)}</small>` : ""}</div>`).join("");
+}
+
+$("cash-out").onclick = () => { Game.cashOut(); render(); };
+$("reroll").onclick = () => { Shop.reroll(); render(); };
+$("next-round").onclick = () => { Game.nextRound(); render(); };
+$("skip-pack").onclick = () => { Shop.closePack(); render(); };
+$("game").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.buyJoker) Shop.buyJoker(Number(b.dataset.buyJoker));
+  else if (b.dataset.buyPack) Shop.buyPack(Number(b.dataset.buyPack));
+  else if (b.dataset.pick) Shop.pick(Number(b.dataset.pick));
+  else if (b.dataset.k) Game.sellJoker(Number(b.dataset.k));
+  else return;
+  render();
+});
+
 // Deck viewer -----------------------------------------------------------
 
 function renderDeck() {
@@ -160,14 +239,15 @@ function renderDeck() {
     }
     return a.uid - b.uid;
   });
-  const onBoard = new Set(s.board.filter(Boolean).map((c) => c.uid));
-  $("deck-title").textContent = `${s.deckDef.name}: ${s.runDeck.length} cards, ${s.pile.length} left to draw`;
+  const inRound = s.phase === "round";
+  const onBoard = new Set(inRound ? s.board.filter(Boolean).map((c) => c.uid) : []);
+  $("deck-title").textContent = `${s.deckDef.name}: ${s.runDeck.length} cards` + (inRound ? `, ${s.pile.length} left to draw` : "");
   $("deck-list").innerHTML = cards.map((c) =>
-    `<div class="card${s.used.has(c.uid) ? " used" : ""}${onBoard.has(c.uid) ? " sel" : ""}" title="${c.id}">${cardSvg(c)}</div>`).join("");
+    `<div class="card${inRound && s.used.has(c.uid) ? " used" : ""}${onBoard.has(c.uid) ? " sel" : ""}" title="${c.id}">${cardSvg(c)}</div>`).join("");
   for (const b of document.querySelectorAll("[data-sort]")) b.classList.toggle("on", b.dataset.sort === deckSort);
 }
 
-$("view-deck").onclick = () => { renderDeck(); $("deck-dialog").showModal(); };
+$("view-deck").onclick = $("view-deck-2").onclick = () => { renderDeck(); $("deck-dialog").showModal(); };
 $("close-deck").onclick = () => $("deck-dialog").close();
 for (const b of document.querySelectorAll("[data-sort]")) b.onclick = () => { deckSort = b.dataset.sort; renderDeck(); };
 
