@@ -1,0 +1,27 @@
+# Runs the balancing sweep on GitHub's servers. Start it from the Actions tab: "Bot sweep" → "Run workflow".
+# The report and the full CSV are attached to the run as a download ("sweep").
+name: Bot sweep
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Runs per joker
+        default: "500"
+      board:
+        description: Cards on the board
+        default: "10"
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: tools/sweep.sh "${{ inputs.runs }}" "${{ inputs.board }}"
+      - run: cat sweep/report.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sweep
+          path: sweep/

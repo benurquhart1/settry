@@ -31,4 +31,10 @@ Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 
 ## Balancing bot
 
-`node tools/bot.js --runs 500 --force-each --out runs.csv` plays runs headless with a rule-based bot (10-card board, like the game; `--board N` to try another size), forcing each joker in turn on the same seeds. `python3 tools/analyze.py runs.csv` ranks the jokers against the no-joker baseline. Each run takes about 0.2 s, so `--force-each` at 500 runs is roughly 2 hours.
+A rule-based bot plays runs headless (same rules as the game) to measure how strong each joker is.
+
+- **On GitHub (no computer needed):** Actions tab → "Bot sweep" → "Run workflow". When it finishes, the ranking shows on the run's summary page and the full data is under "Artifacts" → `sweep`.
+- **On your computer:** `tools/sweep.sh 500` (needs Node and Python 3). Uses every CPU core and writes `sweep/report.txt` and `sweep/runs.csv`. About 0.3 s per run per core: 500 runs for each of ~115 jokers is roughly 80 minutes on 4 cores.
+- Smaller tests: `node tools/bot.js --runs 100` (no forced joker) or `--joker plainJoker`.
+
+Every joker is forced from the start of the run and compared with a no-joker baseline on the same seeds. The report lists each joker's win rate, change in fights reached (with ± error) and 90th-percentile best hand, then the jokers that aren't clearly better than no joker.

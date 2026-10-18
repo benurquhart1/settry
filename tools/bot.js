@@ -6,7 +6,7 @@
 //                                                            500 runs each, plus a baseline
 // Options: --runs N, --board N (cards on the board, default 10), --deck id (default freeForAll),
 //   --seed prefix, --joker id (force one joker), --force-each, --out file.csv, --endless N (keep
-//   playing endless fights up to fight N).
+//   playing endless fights up to fight N), --part k/N (play a share of the runs; tools/sweep.sh uses it).
 // The same seeds are used for every forced joker, so each joker is compared with the baseline on
 // identical runs. The bot itself makes no random choices: a seed always replays the same run.
 // tools/analyze.py reads the CSV.
@@ -208,9 +208,13 @@ function main() {
   const forcedSets = flag("force-each")
     ? [[], ...window.SETTRY_JOKERS.filter((j) => j.effect.type !== "none").map((j) => [j.id])]
     : [opt("joker") ? [opt("joker")] : []];
+  // --part k/N plays only every Nth run (starting at k), so N copies can run side by side.
+  const [part, parts] = (opt("part", "0/1")).split("/").map(Number);
   const rows = [];
+  let job = 0;
   for (const jokers of forcedSets)
-    for (let r = 0; r < runs; r++) rows.push(run({ deck, seed: `${prefix}-${r}`, jokers, endlessTo }));
+    for (let r = 0; r < runs; r++)
+      if (job++ % parts === part) rows.push(run({ deck, seed: `${prefix}-${r}`, jokers, endlessTo }));
   const out = opt("out");
   if (out) {
     const cols = Object.keys(rows[0]);
