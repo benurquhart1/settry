@@ -30,15 +30,16 @@ const Jokers = {
     return { different: groups, same: cards.length, timesPlayed };
   },
 
-  // Played cards that count as a color (a wild color counts as every color).
-  colorCount(cards, color) {
-    return cards.filter((c) => c.color === color || Deck.isWild(c, "color")).length;
+  // Played cards whose attribute has this value (a wild card counts as every value).
+  cardsWith(cards, attribute, value) {
+    return cards.filter((c) => c[attribute] === value || Deck.isWild(c, attribute));
   },
 
   // Scoring steps for the held jokers, left to right, after the cards have added their points.
   // Returns { steps: [{ joker, label, points, mult }], points, mult, money }.
-  // Chance-based money is not rolled here (this also runs for the preview); see chanceMoney.
-  apply(jokerIds, counts, cards, points, mult) {
+  // Chance effects only happen when `random` is given, which is once, when the hand is played;
+  // without it (the preview) they show as a step with no effect.
+  apply(jokerIds, counts, cards, points, mult, random) {
     const steps = [];
     let money = 0;
     const step = (joker, label) => steps.push({ joker, label, points, mult });
@@ -49,26 +50,28 @@ const Jokers = {
       if (e.type === "mulMult") { mult *= n; step(id, `×${n} mult`); }
       if (e.type === "money") { money += n; step(id, `+$${n}`); }
       if (e.type === "allDifferentSet" && counts.allDifferentSet) { mult *= e.mult; step(id, `×${e.mult} mult`); }
-      if (e.type === "colorCards") {
-        const k = Jokers.colorCount(cards, e.color);
+      if (e.type === "distinctNumbers") {
+        const k = new Set(cards.filter((c) => !Deck.isWild(c, "count")).map((c) => c.count)).size;
+        mult += k * e.mult;
+        step(id, `+${k * e.mult} mult`);
+      }
+      if (e.type === "cardsWith") {
+        const k = Jokers.cardsWith(cards, e.attribute, e.value).length;
         if (!k) continue;
         if (e.mult) { mult += k * e.mult; step(id, `+${k * e.mult} mult`); }
         if (e.points) { points += k * e.points; step(id, `+${k * e.points} points`); }
-        if (e.chance) step(id, `${k} chance${k > 1 ? "s" : ""} at $${e.money}`);
+        if (!e.chance) continue;
+        const prize = e.money ? `$${e.money}` : `×${e.xMult} mult`;
+        if (!random) { step(id, `${k} × ${Math.round(e.chance * 100)}% at ${prize}`); continue; }
+        for (let i = 0; i < k; i++) {
+          if (random() >= e.chance) { step(id, "no luck"); continue; }
+          if (e.money) money += e.money;
+          if (e.xMult) mult *= e.xMult;
+          step(id, prize.startsWith("$") ? `+${prize}` : prize);
+        }
       }
     }
     return { steps, points, mult, money };
-  },
-
-  // Rolls chance-based money for a play, with the game's seeded random(). Call once, when the hand is played.
-  chanceMoney(jokerIds, cards, random) {
-    let money = 0;
-    for (const id of jokerIds) {
-      const e = Jokers.byId(id).effect;
-      if (e.type !== "colorCards" || !e.chance) continue;
-      for (let i = 0; i < Jokers.colorCount(cards, e.color); i++) if (random() < e.chance) money += e.money;
-    }
-    return money;
   },
 
   has(jokerIds, type) {

@@ -62,16 +62,25 @@ const Game = {
     return !s.over && s.discardsLeft > 0 && n >= 1 && n <= window.SETTRY_CONFIG.maxDiscardSize;
   },
 
-  play() {
+  // Scores the selected cards for real, rolling any chance effects with the seed.
+  // Call once per play, then pass the result to play().
+  rollHand() {
     const s = Game.state;
-    if (!Game.canPlay()) return;
-    const hand = Game.selectedHand();
-    const lucky = Jokers.chanceMoney(s.jokers, Game.selectedCards(), s.random);
+    if (!Game.canPlay()) return null;
+    const preview = Game.selectedHand();
+    const scored = Hands.score(Game.selectedCards(), window.SETTRY_HANDS[preview.id], preview.id,
+      { jokers: s.jokers, timesPlayed: s.timesPlayed, random: s.random });
+    return { ...preview, ...scored };
+  },
+
+  play(hand = Game.rollHand()) {
+    const s = Game.state;
+    if (!hand || !Game.canPlay()) return;
     s.score += hand.total;
-    s.money += hand.money + lucky;
+    s.money += hand.money;
     s.timesPlayed[hand.id] = (s.timesPlayed[hand.id] || 0) + 1;
     s.playsLeft--;
-    s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}` + (lucky ? ` · +$${lucky} from luck` : "");
+    s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}` + (hand.money ? ` · +$${hand.money}` : "");
     Game.replaceSelected();
     Game.checkEnd();
   },

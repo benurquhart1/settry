@@ -86,6 +86,10 @@ Pick a starting deck on the start menu (arrows to switch). Decks live in `data/d
 | Blue | 40 cards drawn from the 64 blue cards |
 | Green | 40 cards drawn from the 64 green cards |
 | Black | 40 cards drawn from the 64 black cards |
+| Heart | 40 cards drawn from the 64 hearts |
+| Diamond | 40 cards drawn from the 64 diamonds |
+| Spade | 40 cards drawn from the 64 spades |
+| Club | 40 cards drawn from the 64 clubs |
 
 Cards are drawn **with replacement**, so a deck can hold several copies of the same card.
 
@@ -133,6 +137,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Uncommon | Big Table | +2 cards on the board. |
 | Uncommon | Odd One Out | Earn $1 for each difference in the hand. |
 | Uncommon | Birds of a Feather | Earn $1 for each match in the hand. |
+| Uncommon | Numberfile | +1 mult for each different number played. |
 | Rare | Kaleidoscope | Multiply mult by the number of differences in the hand. |
 | Rare | Mirror | Multiply mult by the number of matches in the hand. No matches scores 0. |
 | Rare | Fifth Card | Play up to 5 cards at a time (the normal limit is 4). |
@@ -140,14 +145,26 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Shredder | If your first discard of the round is 1 card, remove it from your deck. |
 | Rare | Full Spectrum | ×5 mult if the hand is a set with every attribute different. |
 | Unique | Recycle | Played and discarded cards go straight back into the draw pile (at random spots). Unlock: run out of cards in the draw pile. |
-| Unique | Red Joker | +1 mult for each red card played. Unlock: beat the red deck. |
-| Unique | Blue Joker | +10 points for each blue card played. Unlock: beat the blue deck. |
-| Unique | Green Joker | Each green card played has a 50% chance to earn $1 (rolled with the seed). Unlock: beat the green deck. |
-| Unique | Black Joker | TBD. Unlock: beat the black deck. |
-| Legendary | (to come) | |
 
-Money ($) is tracked but has no use yet. A wild color card counts as every color for the color jokers.
-Unlocks are listed but not tracked yet: that needs user accounts and saves (see `docs/TODO.md`). The test picker on the start menu offers every joker, locked or not.
+**Deck jokers** (common, ben 2026-10-18): one per starting deck, unlocked by beating that deck.
+
+| Joker | Effect |
+|-------|--------|
+| Red Joker | +1 mult for each red card played. |
+| Blue Joker | +10 points for each blue card played. |
+| Green Joker | Each green card played has a 50% chance to earn $1. |
+| Black Joker | TBD. |
+| Diamond Joker | Each diamond played has a 50% chance of ×2 mult. |
+| Spade Joker | TBD. |
+| Heart Joker | TBD. |
+| Club Joker | TBD. |
+
+Chance effects are rolled with the game's seed, once, when the hand is played; the preview just shows the odds.
+A wild card counts as every color (or suit) for these jokers.
+
+Legendary jokers: to come.
+
+Money ($) is tracked but has no use yet. Unlocks are listed but not tracked yet: that needs user accounts and saves (see `docs/TODO.md`). The test picker on the start menu offers every joker, locked or not.
 
 ## Open questions
 

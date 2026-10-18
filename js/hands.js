@@ -45,7 +45,8 @@ const Hands = {
 
   // Scores a hand Balatro-style: start from the hand's points and mult, then each card,
   // in the order given (the order clicked), adds its points, then each joker applies left to right.
-  // ctx: { jokers: [ids], timesPlayed: {handId: n} } for plays already made this game.
+  // ctx: { jokers: [ids], timesPlayed: {handId: n} for plays already made this game,
+  //        random: the game's random(), only when the hand is actually played }.
   score(cards, hand, id, ctx = {}) {
     const steps = [];
     let points = hand.points;
@@ -55,7 +56,7 @@ const Hands = {
       steps.push({ card, add, points });
     }
     const counts = Jokers.counts(cards, id, ((ctx.timesPlayed || {})[id] || 0) + 1);
-    const j = Jokers.apply(ctx.jokers || [], counts, cards, points, hand.mult);
+    const j = Jokers.apply(ctx.jokers || [], counts, cards, points, hand.mult, ctx.random);
     return { steps, jokerSteps: j.steps, cardPoints: points, points: j.points, baseMult: hand.mult, mult: j.mult, money: j.money, total: j.points * j.mult };
   },
 

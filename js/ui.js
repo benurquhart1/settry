@@ -118,8 +118,9 @@ const stepMs = matchMedia("(prefers-reduced-motion: reduce)").matches ? 120 : 45
 
 // Score the play one card at a time, in the order clicked, then apply it.
 $("play").onclick = async () => {
-  const hand = Game.selectedHand();
-  if (!hand || !Game.canPlay()) return;
+  if (animating) return;
+  const hand = Game.rollHand();
+  if (!hand) return;
   animating = true;
   render();
   const slots = $("picked").querySelectorAll(".card");
@@ -141,7 +142,7 @@ $("play").onclick = async () => {
   $("hand-box").innerHTML = handBox(hand, { points: hand.points, mult: hand.mult, done: true });
   await wait(stepMs * 2);
   animating = false;
-  Game.play();
+  Game.play(hand);
   render();
 };
 $("discard").onclick = () => { if (!animating) { Game.discard(); render(); } };

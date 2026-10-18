@@ -3,8 +3,10 @@
 // effect types:
 //   addMult    +N mult, N from `per`       mulMult   x N mult, N from `per`
 //   money      +$N when the hand scores    extra     raise a round setting by `amount`
-//   colorCards for each played card of `color` (wild color counts): `mult`, `points`,
-//              or a `chance` (0-1, rolled with the game's seed) of `money`
+//   cardsWith  for each played card whose `attribute` is `value` (a wild card counts):
+//              `mult` (+mult), `points` (+points), or a `chance` (0-1) of `money` or `xMult`.
+//              Chances are rolled with the game's seed, only when the hand is played.
+//   distinctNumbers  +`mult` for each different number among the played cards
 //   allDifferentSet  x `mult` when the hand is a set with every attribute different
 //   singleDiscard    on the round's first discard, if it is 1 card: "duplicate" adds a copy
 //                    of it to your deck, "remove" takes it out of your deck for good
@@ -50,6 +52,18 @@ window.SETTRY_JOKERS = [
   { id: "birdsOfAFeather", name: "Birds of a Feather", rarity: "uncommon", art: "$=",
     text: "Earn $1 for each match in the hand.",
     effect: { type: "money", per: "same" }, unlocked: true },
+  { id: "numberfile", name: "Numberfile", rarity: "uncommon", art: "#",
+    text: "+1 mult for each different number played.",
+    effect: { type: "distinctNumbers", mult: 1 }, unlocked: true },
+  { id: "diamondJoker", name: "Diamond Joker", rarity: "common", art: "♦",
+    text: "Each diamond played has a 50% chance of ×2 mult.",
+    effect: { type: "cardsWith", attribute: "shape", value: "diamond", chance: 0.5, xMult: 2 }, unlocked: false, unlock: "Beat the diamond deck." },
+  { id: "spadeJoker", name: "Spade Joker", rarity: "common", art: "♠", text: "TBD",
+    effect: { type: "none" }, unlocked: false, unlock: "Beat the spade deck." },
+  { id: "heartJoker", name: "Heart Joker", rarity: "common", art: "♥", text: "TBD",
+    effect: { type: "none" }, unlocked: false, unlock: "Beat the heart deck." },
+  { id: "clubJoker", name: "Club Joker", rarity: "common", art: "♣", text: "TBD",
+    effect: { type: "none" }, unlocked: false, unlock: "Beat the club deck." },
 
   // Rare
   { id: "kaleidoscope", name: "Kaleidoscope", rarity: "rare", art: "×≠",
@@ -71,20 +85,20 @@ window.SETTRY_JOKERS = [
     text: "×5 mult if the hand is a set with every attribute different.",
     effect: { type: "allDifferentSet", mult: 5 }, unlocked: true },
 
-  // Unique
+  // Unique (Recycle). The deck jokers below are common, one per starting deck.
   { id: "recycle", name: "Recycle", rarity: "unique", art: "♻",
     text: "Played and discarded cards go straight back into the draw pile.",
     effect: { type: "recycle" }, unlocked: false, unlock: "Run out of cards in the draw pile." },
-  { id: "redJoker", name: "Red Joker", rarity: "unique", art: "R",
+  { id: "redJoker", name: "Red Joker", rarity: "common", art: "R",
     text: "+1 mult for each red card played.",
-    effect: { type: "colorCards", color: "red", mult: 1 }, unlocked: false, unlock: "Beat the red deck." },
-  { id: "blueJoker", name: "Blue Joker", rarity: "unique", art: "B",
+    effect: { type: "cardsWith", attribute: "color", value: "red", mult: 1 }, unlocked: false, unlock: "Beat the red deck." },
+  { id: "blueJoker", name: "Blue Joker", rarity: "common", art: "B",
     text: "+10 points for each blue card played.",
-    effect: { type: "colorCards", color: "blue", points: 10 }, unlocked: false, unlock: "Beat the blue deck." },
-  { id: "greenJoker", name: "Green Joker", rarity: "unique", art: "G",
+    effect: { type: "cardsWith", attribute: "color", value: "blue", points: 10 }, unlocked: false, unlock: "Beat the blue deck." },
+  { id: "greenJoker", name: "Green Joker", rarity: "common", art: "G",
     text: "Each green card played has a 50% chance to earn $1.",
-    effect: { type: "colorCards", color: "green", chance: 0.5, money: 1 }, unlocked: false, unlock: "Beat the green deck." },
-  { id: "blackJoker", name: "Black Joker", rarity: "unique", art: "K",
+    effect: { type: "cardsWith", attribute: "color", value: "green", chance: 0.5, money: 1 }, unlocked: false, unlock: "Beat the green deck." },
+  { id: "blackJoker", name: "Black Joker", rarity: "common", art: "K",
     text: "TBD",
     effect: { type: "none" }, unlocked: false, unlock: "Beat the black deck." },
 
