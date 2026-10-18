@@ -11,17 +11,11 @@ const Deck = {
     return cards;
   },
 
-  shuffle(cards) {
-    const c = cards.slice();
-    for (let i = c.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [c[i], c[j]] = [c[j], c[i]];
-    }
-    return c;
-  },
-
-  runDeck(size) {
-    return Deck.shuffle(Deck.full()).slice(0, size);
+  // A run deck: deck.size cards drawn with replacement from the cards matching deck.filter.
+  // Each drawn card gets its own uid, since the same card can appear more than once.
+  runDeck(deck, random) {
+    const pool = Deck.full().filter((c) => Object.entries(deck.filter || {}).every(([k, v]) => c[k] === v));
+    return Array.from({ length: deck.size }, (_, i) => ({ ...pool[Rng.int(random, pool.length)], uid: i }));
   },
 
   // A set (3 or 4 cards): for each attribute the cards are all the same or all different

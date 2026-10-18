@@ -31,20 +31,14 @@ const Hands = {
     set4: (c) => c.length === 4 && Deck.isSet(c),
   },
 
-  // The best-scoring hand made by any group of the played cards (extra cards just don't score).
+  // The best-scoring hand made by all of the played cards together, or null.
+  // Every played card has to be part of the hand: no extra cards.
   best(cards) {
     let best = null;
-    const groups = Hands.subsets(cards);
     for (const [id, hand] of Object.entries(window.SETTRY_HANDS)) {
       const score = hand.points * hand.mult;
-      if (best && score <= best.score) continue;
-      const used = groups.find((g) => Hands.checks[id]?.(g));
-      if (used) best = { id, ...hand, score, used };
+      if ((!best || score > best.score) && Hands.checks[id]?.(cards)) best = { id, ...hand, score };
     }
     return best;
-  },
-
-  subsets(cards) {
-    return cards.reduce((acc, c) => acc.concat(acc.map((s) => [...s, c])), [[]]).filter((s) => s.length >= 2);
   },
 };

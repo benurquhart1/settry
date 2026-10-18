@@ -20,7 +20,8 @@ Every combination is one card, so the full deck is 4 × 4 × 4 × 4 = 256 cards.
 ## Hands
 
 Each play uses 2 to 5 cards from your hand. The play scores its best hand: **points × mult**.
-Cards that aren't part of that hand are played but don't add anything.
+Every card you play has to be part of the hand: no extra cards.
+For example, you can't play 4 cards when only 3 of them form a set.
 The list and numbers live in `data/hands.js`; how each is recognized is in `js/hands.js`.
 
 | Hand | Cards | Points | Mult | Score |
@@ -68,24 +69,39 @@ Modifications live in `data/modifiers.js`. A card lists the ones it has in `card
 
 How a card gets a modification (shop, reward, joker) is still to decide. `gallery.html` shows examples of each, and of cards with several.
 
+## Starting decks and seeds
+
+Pick a starting deck on the start menu (arrows to switch). Decks live in `data/decks.js`.
+
+| Deck | Cards |
+|------|-------|
+| Red | 40 cards drawn from the 64 red cards |
+| Blue | 40 cards drawn from the 64 blue cards |
+| Green | 40 cards drawn from the 64 green cards |
+| Black | 40 cards drawn from the 64 black cards |
+
+Cards are drawn **with replacement**, so a deck can hold several copies of the same card.
+
+Every game has a **seed** (shown on the start menu and during play). Every random thing in the game (building the deck, the deal, and later rewards and the shop) uses it, so the same seed and deck always play out the same.
+All randomness must go through `js/rng.js`; never call `Math.random()` for game logic.
+
 ## The round (current version)
 
 | Setting | Value | Config key |
 |---------|-------|------------|
-| Run deck | 30 cards drawn at random from the 256 | `runDeckSize` |
-| Hand | 12 cards | `handSize` |
+| Board | 16 cards in a 4x4 grid | `boardSize` |
 | Play size | 2 to 5 cards | `minPlay`, `maxPlay` |
-| Plays | 4 per round | `plays` |
+| Hands | 4 per round | `plays` |
 | Target | 150 points (placeholder) | `roundTarget` |
 | Discards | 2 per round, up to 4 cards each | `discards`, `maxDiscardSize` |
 
-1. Shuffle the 256 cards and take 30. That is your deck for the run.
-2. Draw a hand of 12.
-3. Select 2 to 5 cards and press **Play**. The game shows which hand they make before you play. Played cards are replaced from the deck.
-4. Or select 1 to 4 cards and press **Discard** to swap them.
-5. Reach the target within 4 plays to win the round.
+1. Your deck is shuffled (by the seed) into a draw pile, and 16 cards are dealt face up.
+2. Select 2 to 5 cards. If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
+3. Or select 1 to 4 cards and press **Discard** to swap them.
+4. Played and discarded cards are replaced from the draw pile. When the pile is empty, their spots stay empty.
+5. Reach the target within 4 hands to win the round.
 
-There is only one round so far, and one player.
+**View deck** shows every card in your deck, sortable by color, number, shape or shading. Faded cards are used, outlined ones are on the board.
 
 ## Jokers
 

@@ -8,21 +8,56 @@
 </head>
 <body>
   <h1>Settry</h1>
-  <p id="info"></p>
-  <div id="board"></div>
-  <p id="preview"></p>
-  <p id="msg"></p>
-  <div class="actions">
-    <button id="play">Play</button>
-    <button id="discard">Discard</button>
-    <button id="new">New run</button>
-    <a href="gallery.html">All cards</a>
-  </div>
+
+  <section id="menu">
+    <div class="picker">
+      <button id="prev-deck" aria-label="Previous deck">◀</button>
+      <div id="deck-choice"></div>
+      <button id="next-deck" aria-label="Next deck">▶</button>
+    </div>
+    <label class="seed">Seed <input id="seed" size="12" spellcheck="false"></label>
+    <button id="start" class="big">Start game</button>
+    <p><a href="gallery.html">See all cards</a></p>
+  </section>
+
+  <section id="game" hidden>
+    <div class="table">
+      <div id="board"></div>
+      <aside>
+        <div id="hand-box"></div>
+        <p id="info"></p>
+        <p id="msg"></p>
+        <div class="actions">
+          <button id="play">Play hand</button>
+          <button id="discard">Discard</button>
+          <button id="view-deck">View deck</button>
+          <button id="menu-btn">Menu</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <dialog id="deck-dialog">
+    <div class="dialog-head">
+      <strong id="deck-title"></strong>
+      <span>Sort by
+        <button data-sort="color">Color</button>
+        <button data-sort="count">Number</button>
+        <button data-sort="shape">Shape</button>
+        <button data-sort="shading">Shade</button>
+      </span>
+      <button id="close-deck">Close</button>
+    </div>
+    <p class="hint">Faded cards have been played or discarded. Outlined cards are on the board.</p>
+    <div id="deck-list" class="gallery"></div>
+  </dialog>
 
   <script src="data/config.js"></script>
+  <script src="data/decks.js"></script>
   <script src="data/jokers.js"></script>
   <script src="data/modifiers.js"></script>
   <script src="data/hands.js"></script>
+  <script src="js/rng.js"></script>
   <script src="js/deck.js"></script>
   <script src="js/hands.js"></script>
   <script src="js/cards.js"></script>

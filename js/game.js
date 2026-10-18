@@ -2,13 +2,21 @@
 const Game = {
   state: null,
 
-  newRun() {
+  // Start a round with a deck from data/decks.js and a seed for every random choice.
+  start(deckDef, seed) {
     const cfg = window.SETTRY_CONFIG;
-    const deck = Deck.runDeck(cfg.runDeckSize);
+    const random = Rng.create(seed);
+    const runDeck = Deck.runDeck(deckDef, random);
+    const pile = runDeck.slice();
     Game.state = {
-      deck,                                   // draw pile for this run
-      hand: deck.splice(0, cfg.handSize),     // cards you can play
-      selected: [],                           // indices into hand
+      seed,
+      deckDef,
+      random,                                 // use for anything random later (rewards, shop)
+      runDeck,                                // every card in this run's deck
+      pile,                                   // draw pile, top first
+      board: pile.splice(0, cfg.boardSize),   // face-up cards; empty spots are null
+      selected: [],                           // indices into board
+      used: new Set(),                        // uids of cards played or discarded
       score: 0,
       playsLeft: cfg.plays,
       discardsLeft: cfg.discards,
@@ -18,22 +26,27 @@ const Game = {
   },
 
   selectedCards() {
-    return Game.state.selected.map((i) => Game.state.hand[i]);
+    return Game.state.selected.map((i) => Game.state.board[i]);
   },
 
   toggle(i) {
     const s = Game.state;
-    if (s.over) return;
+    if (s.over || !s.board[i]) return;
     const at = s.selected.indexOf(i);
     if (at >= 0) s.selected.splice(at, 1);
     else if (s.selected.length < Math.max(window.SETTRY_CONFIG.maxPlay, window.SETTRY_CONFIG.maxDiscardSize)) s.selected.push(i);
     s.message = "";
   },
 
-  canPlay() {
+  // The hand the selected cards make, or null.
+  selectedHand() {
     const cfg = window.SETTRY_CONFIG;
     const n = Game.state.selected.length;
-    return !Game.state.over && n >= cfg.minPlay && n <= cfg.maxPlay && !!Hands.best(Game.selectedCards());
+    return n >= cfg.minPlay && n <= cfg.maxPlay ? Hands.best(Game.selectedCards()) : null;
+  },
+
+  canPlay() {
+    return !Game.state.over && Game.state.playsLeft > 0 && !!Game.selectedHand();
   },
 
   canDiscard() {
@@ -45,7 +58,7 @@ const Game = {
   play() {
     const s = Game.state;
     if (!Game.canPlay()) return;
-    const hand = Hands.best(Game.selectedCards());
+    const hand = Game.selectedHand();
     s.score += hand.score;
     s.playsLeft--;
     s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.score}`;
@@ -61,11 +74,14 @@ const Game = {
     Game.replaceSelected();
   },
 
-  // Selected cards leave the hand; new cards from the deck take their spots.
+  // Selected cards leave the board; cards from the draw pile take their spots.
+  // Once the pile is empty, the spots stay empty.
   replaceSelected() {
     const s = Game.state;
-    for (const i of s.selected) s.hand[i] = s.deck.length ? s.deck.shift() : null;
-    s.hand = s.hand.filter(Boolean);
+    for (const i of s.selected) {
+      s.used.add(s.board[i].uid);
+      s.board[i] = s.pile.length ? s.pile.shift() : null;
+    }
     s.selected = [];
   },
 

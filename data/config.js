@@ -1,10 +1,9 @@
-// Run settings. Change numbers here; docs/RULES.md explains each one.
+// Round settings. Change numbers here; docs/RULES.md explains each one.
 window.SETTRY_CONFIG = {
-  runDeckSize: 30,     // cards drawn at random from the full deck at the start of a run
-  handSize: 12,        // cards in your hand
+  boardSize: 16,       // cards dealt face up (a 4x4 grid)
   minPlay: 2,          // fewest cards one play can use
   maxPlay: 5,          // most cards one play can use
-  plays: 4,            // plays per round
+  plays: 4,            // hands per round
   roundTarget: 150,    // score needed to beat the round (placeholder until antes exist)
   discards: 2,         // discards per round
   maxDiscardSize: 4,   // most cards one discard can throw away

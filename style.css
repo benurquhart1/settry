@@ -1,10 +1,41 @@
 body { font-family: system-ui, sans-serif; background: #f4f4f4; color: #111; margin: 16px; }
-#board { display: grid; grid-template-columns: repeat(4, 90px); gap: 8px; }
-.card { width: 90px; height: 112px; padding: 4px; background: #fff; border: 2px solid #ccc; border-radius: 8px; cursor: pointer; }
+button { font-size: 15px; padding: 6px 12px; cursor: pointer; }
+button:disabled { cursor: default; }
+.card { width: 90px; height: 112px; padding: 4px; background: #fff; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+button.card { cursor: pointer; }
 .card.sel { border-color: #f90; background: #fff6e5; }
-.card svg { width: 100%; height: 100%; }
-.actions button { font-size: 16px; margin-right: 8px; padding: 6px 12px; }
+.card.empty { background: transparent; border-style: dashed; }
+.card.used { opacity: 0.25; }
+.card svg { width: 100%; height: 100%; display: block; }
+
+/* Start menu */
+#menu { max-width: 520px; text-align: center; }
+.picker { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.picker > button { font-size: 24px; }
+.sample { display: flex; gap: 6px; justify-content: center; }
+.seed { display: block; margin: 20px 0; }
+.seed input { font: inherit; padding: 4px 8px; text-transform: uppercase; }
+.big { font-size: 20px; padding: 10px 28px; }
+
+/* Round */
+.table { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+#board { display: grid; grid-template-columns: repeat(4, 90px); gap: 8px; }
+aside { width: 260px; }
+#hand-box { border: 2px solid #333; border-radius: 8px; padding: 12px; background: #fff; text-align: center; }
+.hand-name { font-size: 20px; font-weight: bold; }
+.hand-score { font-size: 18px; margin-top: 6px; }
+.pts { color: #1565c0; font-weight: bold; }
+.mult { color: #c62828; font-weight: bold; }
+.muted { color: #888; }
 #msg { min-height: 1.2em; font-weight: bold; }
-.gallery { display: grid; grid-template-columns: repeat(16, 60px); gap: 4px; }
-.gallery .card { width: 60px; height: 75px; padding: 2px; cursor: default; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* Deck viewer and gallery */
+dialog { max-width: 90vw; }
+.dialog-head { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+[data-sort].on { background: #333; color: #fff; }
+.hint { color: #666; font-size: 14px; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, 60px); gap: 4px; }
+.gallery .card { width: 60px; height: 75px; padding: 2px; }
+#gallery { grid-template-columns: repeat(16, 60px); }
 #wild { grid-template-columns: repeat(8, 60px); }
