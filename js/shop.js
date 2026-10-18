@@ -65,7 +65,10 @@ const Shop = {
     const options = [];
     for (let n = 0; n < p.options; n++) {
       if (p.kind === "card") options.push({ card: Shop.packCard(), taken: false });
-      else {
+      else if (p.kind === "charm") {
+        const c = Consumables.roll(s.rng.pack, options.map((o) => o.charm));
+        if (c) options.push({ charm: c.id, taken: false });
+      } else {
         const j = Jokers.roll(s.rng.pack, [...s.jokers, ...options.map((o) => o.joker)]);
         if (j) options.push({ joker: j.id, taken: false });
       }
@@ -74,10 +77,10 @@ const Shop = {
     s.phase = "pack";
   },
 
-  // A random card from all 256, sometimes with a wild modification.
+  // A random card (numbers 1 to 4, like starting decks), sometimes with a wild modification.
   packCard() {
     const s = Game.state;
-    const all = Deck.full();
+    const all = Deck.pool();
     const card = { ...all[Rng.int(s.rng.pack, all.length)] };
     if (s.rng.pack() < window.SETTRY_PACK_WILD_CHANCE) {
       const mods = Object.keys(window.SETTRY_MODIFIERS);
@@ -90,6 +93,7 @@ const Shop = {
     const s = Game.state;
     const o = s.pack?.options[n];
     if (!o || o.taken || s.pack.picksLeft <= 0) return false;
+    if (o.charm) return Consumables.hasRoom();
     return !o.joker || s.jokers.length < window.SETTRY_CONFIG.jokerSlots;
   },
 
@@ -99,6 +103,7 @@ const Shop = {
     const o = s.pack.options[n];
     o.taken = true;
     if (o.card) s.runDeck.push({ ...o.card, uid: s.nextUid++ });
+    else if (o.charm) s.consumables.push(o.charm);
     else s.jokers.push(o.joker);
     if (--s.pack.picksLeft <= 0) Shop.closePack();
   },

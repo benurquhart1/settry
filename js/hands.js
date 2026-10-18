@@ -37,27 +37,54 @@ const Hands = {
     set4: (c) => c.length === 4 && Deck.isSet(c),
   },
 
-  // Points a card adds when it scores: its number, or the wild number's points.
+  // Points a card adds when it scores: its number, plus 30 for a Bonus card.
   cardPoints(card) {
-    const wild = (card.mods || []).map((m) => window.SETTRY_MODIFIERS[m]).find((m) => m?.wild === "count");
-    return wild ? wild.points : card.count;
+    return card.count + (window.SETTRY_ENHANCEMENTS[card.enh]?.points || 0);
   },
 
   // Scores a hand Balatro-style: start from the hand's points and mult, then each card,
-  // in the order given (the order clicked), adds its points, then each joker applies left to right.
+  // in the order given (the order clicked), adds its points and applies its enhancement,
+  // then Steel cards left on the board apply, then each joker applies left to right.
   // ctx: { jokers: [ids], timesPlayed: {handId: n} for plays already made this game,
+  //        held: board cards not being played (for Steel),
   //        random: the game's random(), only when the hand is actually played }.
+  // Chances (Lucky, Glass breaking) only roll with `random`; the preview shows the odds.
   score(cards, hand, id, ctx = {}) {
+    const enhs = window.SETTRY_ENHANCEMENTS;
     const steps = [];
+    const broken = [];
     let points = hand.points;
+    let mult = hand.mult;
+    let money = 0;
+    const roll = (odds) => ctx.random() < 1 / odds;
     for (const card of cards) {
       const add = Hands.cardPoints(card);
       points += add;
-      steps.push({ card, add, points });
+      const e = enhs[card.enh] || {};
+      const labels = [];
+      if (e.mult) { mult += e.mult; labels.push(`+${e.mult} mult`); }
+      if (e.luckyMult) {
+        if (!ctx.random) labels.push(`1 in ${e.luckyMult.odds}: +${e.luckyMult.mult} mult, 1 in ${e.luckyMoney.odds}: $${e.luckyMoney.money}`);
+        else {
+          if (roll(e.luckyMult.odds)) { mult += e.luckyMult.mult; labels.push(`lucky +${e.luckyMult.mult} mult`); }
+          if (roll(e.luckyMoney.odds)) { money += e.luckyMoney.money; labels.push(`lucky +$${e.luckyMoney.money}`); }
+        }
+      }
+      if (e.xMult) { mult *= e.xMult; labels.push(`×${e.xMult} mult`); }
+      if (e.breakOdds && ctx.random && roll(e.breakOdds)) { broken.push(card.uid); labels.push("broke"); }
+      steps.push({ card, add, points, mult, label: labels.join(", ") });
+    }
+    const heldSteps = [];
+    for (const card of ctx.held || []) {
+      const x = enhs[card.enh]?.heldXMult;
+      if (!x) continue;
+      mult *= x;
+      heldSteps.push({ card, points, mult, label: `×${x} mult` });
     }
     const counts = Jokers.counts(cards, id, ((ctx.timesPlayed || {})[id] || 0) + 1);
-    const j = Jokers.apply(ctx.jokers || [], counts, cards, points, hand.mult, ctx.random);
-    return { steps, jokerSteps: j.steps, cardPoints: points, points: j.points, baseMult: hand.mult, mult: j.mult, money: j.money, total: j.points * j.mult };
+    const j = Jokers.apply(ctx.jokers || [], counts, cards, points, mult, ctx.random);
+    return { steps, heldSteps, jokerSteps: j.steps, broken, cardPoints: points, cardMult: mult,
+      points: j.points, baseMult: hand.mult, mult: j.mult, money: money + j.money, total: j.points * j.mult };
   },
 
   // The best-scoring hand made by all of the played cards together, or null.

@@ -11,10 +11,22 @@ const Deck = {
     return cards;
   },
 
-  // A run deck: deck.size cards drawn with replacement from the cards matching deck.filter.
+  // The cards a starting deck draws from: those matching deck.filter, numbered 1 to 4.
+  pool(deck = {}) {
+    return Deck.full().filter((c) => window.SETTRY_START_COUNTS.includes(c.count) &&
+      Object.entries(deck.filter || {}).every(([k, v]) => c[k] === v));
+  },
+
+  // Give a card the id matching its attributes (after a charm changes one).
+  reid(card) {
+    card.id = `${card.count}-${card.shape}-${card.shading}-${card.color}`;
+    return card;
+  },
+
+  // A run deck: deck.size cards drawn with replacement from Deck.pool(deck).
   // Each drawn card gets its own uid, since the same card can appear more than once.
   runDeck(deck, random) {
-    const pool = Deck.full().filter((c) => Object.entries(deck.filter || {}).every(([k, v]) => c[k] === v));
+    const pool = Deck.pool(deck);
     return Array.from({ length: deck.size }, (_, i) => ({ ...pool[Rng.int(random, pool.length)], uid: i }));
   },
 

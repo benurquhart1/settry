@@ -16,6 +16,8 @@ const Game = {
       runDeck,                                // every card in your deck; carries over between rounds
       nextUid: runDeck.length,                // uid for the next card added to the deck
       jokers,                                 // held joker ids, applied left to right
+      consumables: [],                        // held charm ids (data/consumables.js)
+      lastConsumable: null,                   // last charm used, for Echo
       money: window.SETTRY_CONFIG.startMoney,
       ante: 1,
       roundIndex: 0,                          // 0 small, 1 big, 2 boss (see config.rounds)
@@ -107,8 +109,14 @@ const Game = {
     const s = Game.state;
     const n = s.selected.length;
     return n >= window.SETTRY_CONFIG.minPlay && n <= s.maxPlay
-      ? Hands.best(Game.selectedCards(), { jokers: s.jokers, timesPlayed: s.timesPlayed })
+      ? Hands.best(Game.selectedCards(), { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards() })
       : null;
+  },
+
+  // Board cards that are not selected (Steel cards work from here).
+  heldCards() {
+    const s = Game.state;
+    return s.board.filter((c, i) => c && !s.selected.includes(i));
   },
 
   canPlay() {
@@ -128,7 +136,7 @@ const Game = {
     if (!Game.canPlay()) return null;
     const preview = Game.selectedHand();
     const scored = Hands.score(Game.selectedCards(), window.SETTRY_HANDS[preview.id], preview.id,
-      { jokers: s.jokers, timesPlayed: s.timesPlayed, random: s.rng.luck });
+      { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards(), random: s.rng.luck });
     return { ...preview, ...scored };
   },
 
@@ -140,7 +148,12 @@ const Game = {
     s.timesPlayed[hand.id] = (s.timesPlayed[hand.id] || 0) + 1;
     s.playsLeft--;
     s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}` + (hand.money ? ` · +$${hand.money}` : "");
-    Game.replaceSelected();
+    // Broken Glass cards leave the deck for good.
+    if (hand.broken.length) {
+      s.runDeck = s.runDeck.filter((c) => !hand.broken.includes(c.uid));
+      s.message += ` · ${hand.broken.length} glass card${hand.broken.length === 1 ? "" : "s"} broke`;
+    }
+    Game.replaceSelected(hand.broken);
     Game.checkEnd();
   },
 

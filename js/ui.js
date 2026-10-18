@@ -9,7 +9,7 @@ let pickedJokers = [];
 
 function renderMenu() {
   const d = decks[deckIndex];
-  const pool = Deck.full().filter((c) => Object.entries(d.filter).every(([k, v]) => c[k] === v));
+  const pool = Deck.pool(d);
   const sample = [pool[5], pool[22], pool[43], pool[63]];
   $("deck-choice").innerHTML = `<h2>${d.name}</h2><p>${d.text} ${d.size} cards.</p>
     <div class="sample">${sample.map((c) => `<div class="card">${cardSvg(c)}</div>`).join("")}</div>`;
@@ -65,9 +65,15 @@ function handBox(hand, shown) {
   const points = shown ? shown.points : hand.points;
   const mult = shown ? shown.mult : hand.mult;
   const total = shown && !shown.done ? "" : ` = ${hand.total}`;
+  const enhs = window.SETTRY_ENHANCEMENTS;
+  const cardLines = [
+    ...hand.steps.filter((st) => st.label).map((st) => `<div>${enhs[st.card.enh].name}: ${st.label}</div>`),
+    ...hand.heldSteps.map((st) => `<div>${enhs[st.card.enh].name} on the board: ${st.label}</div>`),
+  ].join("");
   const jokers = hand.jokerSteps.map((st) => `<div>${Jokers.byId(st.joker).name}: ${st.label}</div>`).join("");
   return `<div class="hand-name">${hand.name}</div>
     <div class="hand-steps">${base}${hand.steps.map((st) => ` + ${st.add}`).join("")} points · ${hand.baseMult} mult</div>
+    ${cardLines ? `<div class="card-steps">${cardLines}</div>` : ""}
     ${jokers ? `<div class="joker-steps">${jokers}</div>` : ""}
     <div class="hand-score"><span class="pts">${points}</span> × <span class="mult">${mult}</span>${total}</div>`;
 }
@@ -83,6 +89,7 @@ function render() {
   $("jokers").innerHTML = s.jokers.map((id, k) => `<div class="held">${jokerHtml(Jokers.byId(id))}` +
     `${selling ? `<button class="sell" data-k="${k}">Sell $${Jokers.sellPrice(id)}</button>` : ""}</div>`).join("") ||
     `<p class="hint">No jokers yet (${s.jokers.length}/${cfg.jokerSlots}).</p>`;
+  renderCharms(selling);
   $("round-view").hidden = s.phase !== "round";
   $("cashout-view").hidden = s.phase !== "cashout";
   $("shop-view").hidden = s.phase !== "shop";
@@ -100,6 +107,20 @@ function render() {
     $("end-title").textContent = "You beat the run!";
     $("end-text").textContent = `All ${cfg.antes} antes cleared with the ${s.deckDef.name.toLowerCase()}, finishing with $${s.money}.`;
   }
+}
+
+// Held charms, with Use (and Sell in the shop). Empty slots show as outlines.
+function renderCharms(selling) {
+  const s = Game.state;
+  const slots = window.SETTRY_CONFIG.consumableSlots;
+  $("consumables").innerHTML = Array.from({ length: slots }, (_, k) => {
+    const id = s.consumables[k];
+    if (!id) return `<div class="charm empty">Charm slot</div>`;
+    const why = animating ? "Scoring" : Consumables.blocker(k);
+    return `<div class="held">${charmHtml(Consumables.byId(id))}
+      <button class="use" data-use="${k}" ${why ? `disabled title="${why}"` : ""}>${why || "Use"}</button>
+      ${selling ? `<button class="sell" data-sell-charm="${k}">Sell $${window.SETTRY_CONFIG.consumableSell}</button>` : ""}</div>`;
+  }).join("");
 }
 
 function renderRound() {
@@ -156,7 +177,16 @@ $("play").onclick = async () => {
   await wait(stepMs);
   for (const [n, st] of hand.steps.entries()) {
     slots[n].classList.add("scoring");
-    $("hand-box").innerHTML = handBox(hand, { points: st.points, mult: hand.baseMult });
+    if (st.label) slots[n].querySelector(".add").textContent += ` ${st.label}`;
+    $("hand-box").innerHTML = handBox(hand, { points: st.points, mult: st.mult });
+    await wait(stepMs);
+  }
+  const boardEls = $("board").querySelectorAll(".card");
+  for (const st of hand.heldSteps) {
+    const el = boardEls[Game.state.board.indexOf(st.card)];
+    el.classList.add("held-scoring");
+    el.dataset.label = st.label;
+    $("hand-box").innerHTML = handBox(hand, { points: st.points, mult: st.mult });
     await wait(stepMs);
   }
   const jokerEls = $("jokers").querySelectorAll(".joker");
@@ -194,8 +224,8 @@ function renderShop() {
       <button data-buy-joker="${i}" ${Shop.canBuyJoker(i) ? "" : "disabled"}>${o.sold ? "Bought" : `Buy $${o.price}`}</button>
       <small>${rarityLabel(o.id)}</small></div>`).join("");
   $("shop-packs").innerHTML = s.shop.packs.map((p, i) => `<div class="offer">
-      <div class="pack ${p.kind}${p.sold ? " sold" : ""}"><b>${p.name}</b>
-        <span>Choose ${p.picks} of ${p.options} ${p.kind === "card" ? "cards to add to your deck" : "jokers"}</span></div>
+      <div class="pack pack-${p.kind}${p.sold ? " sold" : ""}"><b>${p.name}</b>
+        <span>Choose ${p.picks} of ${p.options} ${{ card: "cards to add to your deck", joker: "jokers", charm: "charms" }[p.kind]}</span></div>
       <button data-buy-pack="${i}" ${!p.sold && s.money >= p.price ? "" : "disabled"}>${p.sold ? "Opened" : `Buy $${p.price}`}</button></div>`).join("");
   $("reroll").textContent = `Reroll $${s.shop.rerollCost}`;
   $("reroll").disabled = s.money < s.shop.rerollCost;
@@ -204,8 +234,12 @@ function renderShop() {
 function renderPack() {
   const p = Game.state.pack;
   $("pack-title").textContent = `${p.name}: choose ${p.picksLeft} more`;
+  $("pack-note").textContent = p.kind === "charm" && !Consumables.hasRoom()
+    ? `Your ${window.SETTRY_CONFIG.consumableSlots} charm slots are full: use or sell one to take another.` : "";
   $("pack-options").innerHTML = p.options.map((o, n) => `<div class="offer">
-      ${o.card ? `<div class="card${o.taken ? " used" : ""}">${cardSvg(o.card)}</div>` : jokerHtml(Jokers.byId(o.joker), o.taken ? "sold" : "")}
+      ${o.card ? `<div class="card${o.taken ? " used" : ""}">${cardSvg(o.card)}</div>`
+        : o.charm ? charmHtml(Consumables.byId(o.charm), o.taken ? "sold" : "")
+        : jokerHtml(Jokers.byId(o.joker), o.taken ? "sold" : "")}
       <button data-pick="${n}" ${Shop.canPick(n) ? "" : "disabled"}>${o.taken ? "Taken" : "Take"}</button>
       ${o.card?.mods ? `<small>${o.card.mods.map((m) => window.SETTRY_MODIFIERS[m].name).join(", ")}</small>` : ""}
       ${o.joker ? `<small>${rarityLabel(o.joker)}</small>` : ""}</div>`).join("");
@@ -222,6 +256,8 @@ $("game").addEventListener("click", (e) => {
   else if (b.dataset.buyPack) Shop.buyPack(Number(b.dataset.buyPack));
   else if (b.dataset.pick) Shop.pick(Number(b.dataset.pick));
   else if (b.dataset.k) Game.sellJoker(Number(b.dataset.k));
+  else if (b.dataset.use) Consumables.use(Number(b.dataset.use));
+  else if (b.dataset.sellCharm) Consumables.sell(Number(b.dataset.sellCharm));
   else return;
   render();
 });

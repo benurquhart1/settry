@@ -22,23 +22,28 @@ window.SETTRY_CONFIG = {
   ignoreUnlocks: true, // until saves exist, every joker with an effect can show up in shops and packs
 
   // Round
-  boardSize: 16,       // cards dealt face up (a 4x4 grid)
+  boardSize: 12,       // cards dealt face up (4 across, 3 down); ben trying 12 instead of 16
   minPlay: 2,          // fewest cards one play can use
   maxPlay: 4,          // most cards one play can use (the Fifth Card joker raises it to 5)
   plays: 4,            // hands per round
   discards: 2,         // discards per round
   jokerSlots: 5,       // most jokers you can hold
   maxDiscardSize: 4,   // most cards one discard can throw away
+  consumableSlots: 2, // most charms (consumables) you can hold
+  consumableSell: 1,  // what selling a charm gives back
   allowPairs: false,   // let a set attribute also split into two pairs (A A B B); off per ben's set rule
 };
 
-// The four attributes. Every combination makes one card (4^4 = 256).
+// The four attributes. Numbers go up to 5, but starting decks and Standard packs only use
+// startCounts (1 to 4); 5s come from the Count Up charm, which wraps 5 back to 1.
 window.SETTRY_ATTRIBUTES = {
-  count: [1, 2, 3, 4],
+  count: [1, 2, 3, 4, 5],
   shape: ["heart", "diamond", "spade", "club"],
   shading: ["empty", "solid", "striped", "checkered"],
   color: ["red", "green", "blue", "black"],
 };
+
+window.SETTRY_START_COUNTS = [1, 2, 3, 4];
 
 // How each color is drawn.
 window.SETTRY_COLORS = { red: "#d22", green: "#1a1", blue: "#22c", black: "#111" };

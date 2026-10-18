@@ -25,7 +25,10 @@
 
   <section id="game" hidden>
     <div id="status"></div>
-    <div id="jokers" class="joker-row small"></div>
+    <div class="held-row">
+      <div id="jokers" class="joker-row small"></div>
+      <div id="consumables" class="charm-row"></div>
+    </div>
 
     <div id="round-view" class="table">
       <div class="play-area">
@@ -64,6 +67,7 @@
 
     <div id="pack-view" class="panel" hidden>
       <h2 id="pack-title"></h2>
+      <p id="pack-note" class="hint"></p>
       <div id="pack-options" class="offers"></div>
       <button id="skip-pack">Skip</button>
     </div>
@@ -95,12 +99,14 @@
   <script src="data/jokers.js"></script>
   <script src="data/modifiers.js"></script>
   <script src="data/hands.js"></script>
+  <script src="data/consumables.js"></script>
   <script src="js/rng.js"></script>
   <script src="js/deck.js"></script>
   <script src="js/jokers.js"></script>
   <script src="js/hands.js"></script>
   <script src="js/cards.js"></script>
   <script src="data/packs.js"></script>
+  <script src="js/consumables.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/game.js"></script>
   <script src="js/ui.js"></script>

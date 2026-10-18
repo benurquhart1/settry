@@ -11,7 +11,7 @@
   <p id="info"></p>
   <div id="gallery" class="gallery"></div>
   <h2>Wild cards</h2>
-  <p>Rows: wild suit, wild number, wild color, wild shading, then cards with two or more wilds.</p>
+  <p>Rows: wild suit, wild color, wild shading, then cards with two or three wilds, then the enhancements (mult, bonus, lucky, glass, steel).</p>
   <div id="wild" class="gallery"></div>
   <script src="data/config.js"></script>
   <script src="data/modifiers.js"></script>
@@ -20,16 +20,18 @@
   <script src="js/cards.js"></script>
   <script>
     const cards = Deck.full();
-    document.getElementById("info").textContent = `${cards.length} cards. Each row is one count and shape, in every shading and color.`;
+    document.getElementById("info").textContent = `${cards.length} cards. Each row is one count and shape, in every shading and color. Starting decks only use numbers 1 to 4; 5s come from the Count Up charm.`;
     document.getElementById("gallery").innerHTML = cards
       .map((c) => `<div class="card" title="${c.id}">${cardSvg(c)}</div>`).join("");
     // A sample of each wild modification on assorted cards.
     const sample = (i) => cards[(i * 37 + 11) % cards.length];
-    const rows = [["wildSuit"], ["wildCount"], ["wildColor"], ["wildShading"],
-      ["wildSuit", "wildColor"], ["wildCount", "wildShading"], ["wildSuit", "wildCount", "wildColor", "wildShading"]];
-    document.getElementById("wild").innerHTML = rows.flatMap((mods, r) =>
-      Array.from({ length: 8 }, (_, i) => ({ ...sample(r * 8 + i), mods })))
-      .map((c) => `<div class="card" title="${c.id} ${c.mods.join(" ")}">${cardSvg(c)}</div>`).join("");
+    const rows = [["wildSuit"], ["wildColor"], ["wildShading"],
+      ["wildSuit", "wildColor"], ["wildColor", "wildShading"], ["wildSuit", "wildColor", "wildShading"]];
+    const enhs = Object.keys(window.SETTRY_ENHANCEMENTS);
+    const wilds = rows.flatMap((mods, r) => Array.from({ length: 8 }, (_, i) => ({ ...sample(r * 8 + i), mods })));
+    const enhanced = enhs.flatMap((enh, r) => [0, 1].map((i) => ({ ...sample(100 + r * 2 + i), mods: [], enh })));
+    document.getElementById("wild").innerHTML = [...wilds, ...enhanced]
+      .map((c) => `<div class="card" title="${c.id} ${c.mods.join(" ")} ${c.enh || ""}">${cardSvg(c)}</div>`).join("");
   </script>
 </body>
 </html>

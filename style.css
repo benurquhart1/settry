@@ -31,7 +31,7 @@ button.card { cursor: pointer; }
 #picked { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding-bottom: 12px; border-bottom: 2px solid #ccc; }
 #picked .card { position: relative; border-color: #f90; }
 #picked .card.empty { border-color: #ccc; }
-#picked .add { position: absolute; top: 2px; right: 4px; font-size: 13px; font-weight: bold; color: #1565c0; opacity: 0; }
+#picked .add { position: absolute; top: 2px; right: 2px; left: 2px; text-align: right; font-size: 11px; line-height: 1.1; background: rgba(255,255,255,.85); font-weight: bold; color: #1565c0; opacity: 0; }
 #picked .card.scoring { background: #e3f0ff; border-color: #1565c0; transform: translateY(-4px); transition: transform .15s; }
 #picked .card.scoring .add { opacity: 1; }
 #board .card.picked { opacity: 0.3; }
@@ -84,9 +84,29 @@ dialog { max-width: 90vw; }
 .offer small { color: #666; }
 .sold { opacity: 0.35; }
 .pack { width: 120px; height: 170px; box-sizing: border-box; border-radius: 10px; padding: 10px; display: grid; align-content: center; gap: 8px; text-align: center; color: #fff; font-size: 13px; }
-.pack.card { background: #455a64; }
-.pack.joker { background: #8d6e00; }
+.pack.pack-card { background: #455a64; }
+.pack.pack-joker { background: #8d6e00; }
 .line { display: flex; justify-content: space-between; max-width: 360px; padding: 4px 0; border-bottom: 1px solid #ddd; }
 .line.total { font-size: 18px; border-bottom: none; }
 .held { display: grid; gap: 4px; justify-items: center; }
 .held .sell { font-size: 12px; padding: 2px 8px; }
+
+/* Charms (consumables) */
+.held-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.held-row .joker-row.small { margin-bottom: 0; }
+.charm-row { display: flex; gap: 8px; align-items: flex-start; }
+.charm { width: 82px; min-height: 118px; box-sizing: border-box; border: 3px solid #6a1b9a; border-radius: 10px; background: #fff; text-align: center; display: grid; grid-template-rows: 40px auto 1fr; overflow: hidden; }
+.charm.empty { border-style: dashed; border-color: #bbb; color: #999; font-size: 11px; display: grid; place-items: center; }
+.charm-art { display: grid; place-items: center; background: #6a1b9a; color: #fff; font-size: 20px; font-weight: bold; }
+.charm-name { font-weight: bold; font-size: 11px; padding: 3px 2px 1px; }
+.charm-text { font-size: 9px; line-height: 1.2; margin: 0 3px 3px; padding: 2px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+.offer .charm { width: 120px; min-height: 170px; grid-template-rows: 70px auto 1fr; }
+.offer .charm-art { font-size: 32px; }
+.offer .charm-name { font-size: 13px; }
+.offer .charm-text { font-size: 11px; }
+.held .use { font-size: 12px; padding: 2px 6px; max-width: 82px; }
+.pack.pack-charm { background: #6a1b9a; }
+.card-steps { color: #6a1b9a; font-size: 13px; margin-top: 4px; }
+#board .card { position: relative; }
+#board .card.held-scoring { box-shadow: 0 0 0 3px #424242; }
+#board .card.held-scoring::after { content: attr(data-label); position: absolute; top: 2px; right: 2px; background: #424242; color: #fff; font-size: 11px; font-weight: bold; padding: 1px 4px; border-radius: 4px; }

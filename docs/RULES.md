@@ -6,24 +6,26 @@ When a rule changes, update this file and the data file together.
 
 ## The cards
 
-Each card has four attributes, each with four values:
+Each card has four attributes:
 
 | Attribute | Values |
 |-----------|--------|
-| Count | 1, 2, 3, 4 |
+| Count | 1, 2, 3, 4, 5 |
 | Shape | heart, diamond, spade, club |
 | Shading | empty, solid, striped, checkered |
 | Color | red, green, blue, black |
 
-Every combination is one card, so the full deck is 4 × 4 × 4 × 4 = 256 cards. Open `gallery.html` to see them all.
+Starting decks and Standard packs only use numbers 1 to 4 (256 cards, `SETTRY_START_COUNTS`). 5s only come from the Count Up charm, which adds 1 to a card's number and wraps 5 back to 1 (ben, 2026-10-18). Counting 5s there are 320 cards. Open `gallery.html` to see them all.
 
 ## Hands
 
 Each play uses 2 to 4 cards from the board (5 with the Fifth Card joker). The play scores its best hand, Balatro-style:
 
 1. Start with the hand's points and mult (table below).
-2. Each played card adds its own points, one at a time, **in the order you selected them**: a card adds its number (1 to 4), and a wild number adds 5.
-3. Score = points × mult.
+2. Each played card adds its own points, one at a time, **in the order you selected them**: a card adds its number (1 to 5), then applies its enhancement, if it has one.
+3. Steel cards still on the board (not played) apply.
+4. Jokers apply, left to right.
+5. Score = points × mult.
 
 For example, a set of 4 with numbers 2, 4, 3, 1 scores (20 + 2 + 4 + 3 + 1) × 3 = 90.
 On screen, selected cards move to a row above the board in the order you clicked them (and fade on the board), and score one by one when you play.
@@ -87,24 +89,68 @@ After each round you cash out and visit the shop (`js/shop.js`, packs in `data/p
 | Buffoon | $4 | Choose 1 of 2 jokers |
 | Jumbo Buffoon | $6 | Choose 1 of 4 jokers |
 | Mega Buffoon | $8 | Choose 2 of 4 jokers |
+| Charm | $4 | Choose 1 of 3 charms |
+| Jumbo Charm | $6 | Choose 1 of 5 charms |
+| Mega Charm | $8 | Choose 2 of 5 charms |
 
-Pack cards can be any of the 256 cards, and each has a 25% chance of one wild modification.
+Pack cards can be any of the 256 cards numbered 1 to 4, and each has a 25% chance of one wild modification.
+Charms you take from a pack go into your charm slots; with both full, use or sell one first.
 Jokers in the shop and in packs use the joker drop rates. Until saves exist, locked jokers can still show up (`ignoreUnlocks`), but TBD jokers never do.
 
 The seed drives separate streams for building the deck, shuffling, the shop, packs and luck rolls, so rerolling the shop never changes which cards you draw.
 
 ## Card modifications
 
-Modifications live in `data/modifiers.js`. A card lists the ones it has in `card.mods`, and a card can have more than one.
+Modifications live in `data/modifiers.js`. A card lists the ones it has in `card.mods`, and a card can have more than one (unlike Balatro, wilds stack).
+There is no wild number any more (ben, 2026-10-18): numbers run 1 to 5 instead.
 
 | Modification | Effect | Looks like |
 |--------------|--------|------------|
 | Wild suit | Counts as any shape when checking a set. | A circle in place of the suit. |
-| Wild number | Counts as any number. Adds 5 points when it scores. | 5 symbols in a circle. |
 | Wild color | Counts as any color. | Rainbow running diagonally across the card, red at top left to violet at bottom right. |
 | Wild shading | Counts as any shading. | Polka dots inside the shapes. |
 
-How a card gets a modification (shop, reward, joker) is still to decide. `gallery.html` shows examples of each, and of cards with several.
+Cards get wilds from Standard packs (25% chance of one) and from the Prism and Circle charms. `gallery.html` shows examples of each, of cards with several, and of each enhancement.
+
+### Enhancements
+
+Also in `data/modifiers.js` (`SETTRY_ENHANCEMENTS`). A card has at most one, in `card.enh`; giving it a new one replaces the old (like Balatro).
+An enhanced card has a tinted background and a tag along the bottom.
+
+| Enhancement | Effect |
+|-------------|--------|
+| Mult | +4 mult when scored. |
+| Bonus | +30 points when scored (on top of its number). |
+| Lucky | When scored: 1 in 5 chance of +20 mult, and 1 in 15 chance of $20. |
+| Glass | ×2 mult when scored. 1 in 4 chance to break, which removes it from your deck. |
+| Steel | ×5 mult for each Steel card still on the board (not played) when you play a hand. |
+
+Steel follows Balatro's "held in hand" rule, with the board as your hand; ben set it to ×5 (Balatro's is ×1.5).
+Lucky and Glass chances are rolled with the seed when the hand is played; the preview shows the odds.
+
+## Charms (consumables)
+
+Charms are one-use cards, like Balatro's tarot cards (ben, 2026-10-18). They live in `data/consumables.js`; `js/consumables.js` applies them.
+You hold up to **2** (`consumableSlots`). They come from Charm packs in the shop. Sell one for $1 in the shop.
+Card charms work on cards you select on the board during a round: select the cards, then press **Use**. Money charms can be used any time.
+Changes to a card stay for the rest of the run.
+
+| Charm | Effect |
+|-------|--------|
+| Red / Green / Blue / Black Paint | Turn up to 3 selected cards that color. |
+| Count Up | +1 number on up to 2 selected cards (5 wraps to 1). |
+| Prism | Make 1 selected card wild color. |
+| Circle | Make 1 selected card wild suit. |
+| Fire | Make up to 2 selected cards Mult cards. |
+| Bonus | Make up to 2 selected cards Bonus cards. |
+| Clover | Make up to 2 selected cards Lucky cards. |
+| Glass | Make 1 selected card a Glass card. |
+| Steel | Make 1 selected card a Steel card. |
+| Piggy Bank | Double your money (gain up to $20). |
+| Echo | Create the last charm you used this run (not Echo). |
+| Appraisal | Gain the total sell value of your jokers (up to $50). |
+
+Names and art are placeholders. The card counts follow Balatro's matching tarots.
 
 ## Starting decks and seeds
 
@@ -135,12 +181,12 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 
 | Setting | Value | Config key |
 |---------|-------|------------|
-| Board | 16 cards in a 4x4 grid | `boardSize` |
+| Board | 12 cards, 4 across and 3 down (was 16; ben trying 12, 2026-10-18) | `boardSize` |
 | Play size | 2 to 4 cards (5 with the Fifth Card joker) | `minPlay`, `maxPlay` |
 | Hands | 4 per round | `plays` |
 | Discards | 2 per round, up to 4 cards each | `discards`, `maxDiscardSize` |
 
-1. Your deck is shuffled (by the seed) into a draw pile, and 16 cards are dealt face up.
+1. Your deck is shuffled (by the seed) into a draw pile, and 12 cards are dealt face up.
 2. Select 2 to 4 cards (5 with Fifth Card). If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
 3. Or select 1 to 4 cards and press **Discard** to swap them.
 4. Played and discarded cards are replaced from the draw pile. When the pile is empty, their spots stay empty.

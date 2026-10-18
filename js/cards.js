@@ -13,16 +13,8 @@ const LAYOUTS = {
   2: [[27, 20], [27, 54]],
   3: [[27, 20], [11, 54], [43, 54]],
   4: [[11, 20], [43, 20], [11, 54], [43, 54]],
+  5: [[11, 12], [43, 12], [27, 37], [11, 62], [43, 62]],   // like the 5 on a die
 };
-
-// Wild number: symbols evenly spaced on a circle.
-function circleLayout(n) {
-  const size = 24 * 0.75;
-  return Array.from({ length: n }, (_, i) => {
-    const a = -Math.PI / 2 + (2 * Math.PI * i) / n;
-    return [40 + 25 * Math.cos(a) - size / 2, 50 + 25 * Math.sin(a) - size / 2, 0.75];
-  });
-}
 
 function wildDraw(card, attribute) {
   const mod = (card.mods || []).map((m) => window.SETTRY_MODIFIERS[m]).find((m) => m?.wild === attribute);
@@ -59,8 +51,7 @@ function cardSvg(card) {
   const paint = rainbow ? "#fff" : window.SETTRY_COLORS[card.color];
   const wildShading = wildDraw(card, "shading");
   const shading = wildShading ? wildShading.pattern : card.shading;
-  const wildCount = wildDraw(card, "count");
-  const layout = wildCount ? circleLayout(wildCount.symbols) : LAYOUTS[card.count];
+  const layout = LAYOUTS[card.count];
   const shape = shapeSvg(card);
   // Fill first (patterned shadings are the paint seen through a mask), then the outline.
   const fill = shading === "empty" ? "" : shading === "solid"
@@ -69,10 +60,14 @@ function cardSvg(card) {
   const symbols = layout.map(([x, y, scale = 1]) =>
     `<g transform="translate(${x} ${y}) scale(${scale})">${fill}` +
     `<g fill="none" stroke="${paint}" stroke-width="${1.5 / scale}" stroke-linejoin="round">${shape}</g></g>`);
-  if (!rainbow) return `<svg viewBox="0 0 80 100">${symbols.join("")}</svg>`;
+  // An enhancement tints the card and puts a tag along the bottom.
+  const enh = window.SETTRY_ENHANCEMENTS?.[card.enh]?.draw;
+  const bg = enh ? `<rect x="-4" y="-4" width="88" height="108" rx="5" fill="${enh.bg}"/>` : "";
+  const tag = enh ? `<text x="40" y="98" text-anchor="middle" font-size="9" font-weight="bold" font-family="system-ui, sans-serif" fill="${enh.color}">${enh.tag}</text>` : "";
+  if (!rainbow) return `<svg viewBox="0 0 80 100" overflow="visible">${bg}${symbols.join("")}${tag}</svg>`;
   const id = `rainbow-mask-${maskId++}`;
-  return `<svg viewBox="0 0 80 100"><mask id="${id}">${symbols.join("")}</mask>` +
-    `<rect width="80" height="100" fill="url(#rainbow)" mask="url(#${id})"/></svg>`;
+  return `<svg viewBox="0 0 80 100" overflow="visible">${bg}<mask id="${id}">${symbols.join("")}</mask>` +
+    `<rect width="80" height="100" fill="url(#rainbow)" mask="url(#${id})"/>${tag}</svg>`;
 }
 
 // A joker card: art on the top half, name in the middle, description at the bottom.
@@ -83,6 +78,16 @@ function jokerHtml(joker, extraClass = "", showUnlock = false, extraHtml = "") {
     <div class="joker-name">${joker.name}</div>
     <div class="joker-text">${joker.text}</div>
     ${showUnlock && !joker.unlocked ? `<div class="joker-unlock">Unlock: ${joker.unlock}</div>` : ""}
+    ${extraHtml}
+  </div>`;
+}
+
+// A charm (consumable): a smaller card with art, name and text.
+function charmHtml(charm, extraClass = "", extraHtml = "") {
+  return `<div class="charm ${extraClass}" data-charm="${charm.id}">
+    <div class="charm-art">${charm.art}</div>
+    <div class="charm-name">${charm.name}</div>
+    <div class="charm-text">${charm.text}</div>
     ${extraHtml}
   </div>`;
 }
