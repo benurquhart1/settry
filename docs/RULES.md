@@ -348,7 +348,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Matchmaker | ×2 mult for two pair and full house. |
 | Rare | Mimic | Copies the effect of the joker to its right. |
 | Rare | Spotlight | The first card you select scores twice. |
-| Rare | Veteran | Gains ×0.1 mult for every discard, loses ×1 for every hand played (never below ×1). |
+| Rare | Veteran | Gains ×0.1 mult for every discard, loses ×0.1 for every hand played (never below ×1). |
 | Rare | Last Call | ×5 mult if your draw pile is empty. |
 | Unique | Recycle | Played and discarded cards go straight back into the draw pile (at random spots). Unlock: run out of cards in the draw pile. |
 | Unique | Set Master | Sets of 3 score (and count) as sets of 4. |

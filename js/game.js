@@ -304,7 +304,7 @@ const Game = {
     s.handsThisFight++;
     s.stats.handsPlayed++;
     if (hand.id === "set4") s.stats.set4Played++;
-    s.stats.veteran = Math.max(1, Math.round((s.stats.veteran - 1) * 10) / 10);
+    s.stats.veteran = Math.max(1, Math.round((s.stats.veteran - 0.1) * 10) / 10);
     s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}` + (hand.money ? ` · +$${hand.money}` : "");
     // Cards that scored grow (Workout, Mentor); a lone first hand gets copied (Copycat).
     const scored = hand.steps.filter((st) => st.add || Game.scores(st.card)).map((st) => st.card).filter((c, i, a) => a.indexOf(c) === i);

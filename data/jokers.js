@@ -384,7 +384,7 @@ window.SETTRY_JOKERS = [
     text: "The first card you select scores twice.",
     effect: { type: "retrigger", which: "first" }, unlocked: true },
   { id: "veteran", name: "Veteran", rarity: "rare", art: "🎖",
-    text: "Gains ×0.1 mult for every discard, loses ×1 for every hand played (never below ×1).",
+    text: "Gains ×0.1 mult for every discard, loses ×0.1 for every hand played (never below ×1).",
     effect: { type: "mulMult", per: "veteran" }, unlocked: true },
   { id: "lastCall", name: "Last Call", rarity: "rare", art: "∅",
     text: "×5 mult if your draw pile is empty.",
