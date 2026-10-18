@@ -273,6 +273,9 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Loan Shark | You can go into debt (see Debt above). At cash out, pay 20% interest on your debt. |
 | Rare | High Five | Each 5 played gives +5 mult. |
 | Common | Solid Ground | Each solid card played gives +10 points. |
+| Common | Empty Handed | Each empty card played gives +2 mult. |
+| Common | Pinstripe | Each striped card played gives +1 mult and +5 points. |
+| Common | Checkmate | Each checkered card played has a 1 in 3 chance to earn $1. |
 | Common | Even Steven | Each 2 or 4 played gives +2 mult. |
 | Common | Odd Job | Each 1 or 3 played gives +12 points. |
 | Common | Top Heavy | Each 4 played gives +3 mult. |
