@@ -3,7 +3,6 @@ const $ = (id) => document.getElementById(id);
 const decks = window.SETTRY_DECKS;
 let deckIndex = 0;
 let deckSort = "count";
-let pickedJokers = [];
 
 // Start menu ------------------------------------------------------------
 
@@ -15,34 +14,17 @@ function renderMenu() {
     <div class="sample">${sample.map((c) => `<div class="card">${cardSvg(c)}</div>`).join("")}</div>`;
 }
 
-function renderJokerPick() {
-  $("joker-pick").innerHTML = window.SETTRY_JOKERS.map((j) => {
-    const n = pickedJokers.indexOf(j.id);
-    return jokerHtml(j, n >= 0 ? "on" : "").replace('<div class="joker-art">', `${n >= 0 ? `<b class="order">${n + 1}</b>` : ""}<div class="joker-art">`);
-  }).join("");
-}
-
-$("joker-pick").addEventListener("click", (e) => {
-  const el = e.target.closest(".joker");
-  if (!el) return;
-  const id = el.dataset.joker;
-  if (pickedJokers.includes(id)) pickedJokers = pickedJokers.filter((x) => x !== id);
-  else if (pickedJokers.length < window.SETTRY_CONFIG.jokerSlotsMax) pickedJokers.push(id);
-  renderJokerPick();
-});
-
 function showMenu() {
   $("menu").hidden = false;
   $("game").hidden = true;
   $("seed").value = Rng.newSeed();
   renderMenu();
-  renderJokerPick();
 }
 
 $("prev-deck").onclick = () => { deckIndex = (deckIndex + decks.length - 1) % decks.length; renderMenu(); };
 $("next-deck").onclick = () => { deckIndex = (deckIndex + 1) % decks.length; renderMenu(); };
 $("start").onclick = () => {
-  Game.newRun(decks[deckIndex], $("seed").value.trim() || Rng.newSeed(), pickedJokers.slice());
+  Game.newRun(decks[deckIndex], $("seed").value.trim() || Rng.newSeed());
   $("menu").hidden = true;
   $("game").hidden = false;
   render();

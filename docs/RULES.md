@@ -235,7 +235,7 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 Jokers live in `data/jokers.js` (effects are data; `js/jokers.js` applies them). `jokers.html` shows every joker card.
 A joker card has art on the top half, its name in the middle and a text box at the bottom. Names and art are placeholders.
 You start with 2 joker slots and gain more from bosses (see The run). Scoring jokers apply **left to right**, after the cards have added their points.
-Buy them in the shop or find them in Buffoon packs. You can also pick test jokers on the start menu to start a run with.
+Buy them in the shop, find them in Buffoon packs and fight prizes, or take one from the Starting Jokers pack that opens when a run begins.
 
 **Drop rates** (by rarity): common 60%, uncommon 25%, rare 12%, unique 3%. Legendary jokers never drop.
 Many jokers will need to be unlocked first (`unlocked` in the data; all are unlocked for now).
@@ -292,7 +292,7 @@ A wild card counts as every color (or suit) for these jokers.
 
 Legendary jokers: to come.
 
-Unlocks are listed but not tracked yet: that needs user accounts and saves (see `docs/TODO.md`). The test picker on the start menu offers every joker, locked or not.
+Unlocks are listed but not tracked yet: that needs user accounts and saves (see `docs/TODO.md`).
 
 ## Open questions
 
