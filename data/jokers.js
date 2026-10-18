@@ -18,6 +18,7 @@
 //              `rate` of your debt (rounded up). Reach `limit`, or be below $0 without it, and you lose.
 //   addCard    at the start of each fight, add a random card to your deck (numbers 1 to 4).
 //              deckLimited: only cards your starting deck could have. modChance: chance of a wild or enhancement.
+//   negativeCharm  at the start of each fight, add a random negative charm (it doesn't take a charm slot)
 //   none       no effect yet (still being designed)
 // `per` values (worked out by Hands.counts):
 //   timesPlayed  times this hand type has been played this game, counting this one
@@ -132,6 +133,9 @@ window.SETTRY_JOKERS = [
   { id: "recycle", name: "Recycle", rarity: "unique", art: "♻",
     text: "Played and discarded cards go straight back into the draw pile.",
     effect: { type: "recycle" }, unlocked: false, unlock: "Run out of cards in the draw pile." },
+  { id: "phantom", name: "Phantom", rarity: "unique", art: "👻",
+    text: "At the start of each fight, add a negative copy of a random charm (it doesn't take a charm slot).",
+    effect: { type: "negativeCharm" }, unlocked: true },
   { id: "redJoker", name: "Red Joker", rarity: "common", art: "R",
     text: "+1 mult for each red card played.",
     effect: { type: "cardsWith", attribute: "color", value: "red", mult: 1 }, unlocked: false, unlock: "Beat the red deck." },

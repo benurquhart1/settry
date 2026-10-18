@@ -121,7 +121,7 @@ const Shop = {
     const o = s.pack.options[n];
     o.taken = true;
     if (o.card) s.runDeck.push({ ...o.card, uid: s.nextUid++ });
-    else if (o.charm) s.consumables.push(o.charm);
+    else if (o.charm) s.consumables.push({ id: o.charm, negative: false });
     else s.jokers.push(o.joker);
     if (--s.pack.picksLeft <= 0) Shop.closePack();
   },

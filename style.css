@@ -119,3 +119,6 @@ dialog { max-width: 90vw; }
 .opponent .modifier { color: #c62828; font-size: 14px; }
 .card.banned { filter: grayscale(1); opacity: 0.6; }
 .opponent .prize, .prize { color: #2e7d32; font-size: 14px; }
+.charm.negative { border-color: #222; background: #eceff1; }
+.charm.negative .charm-art { background: #222; }
+.charm.negative .charm-name::after { content: " (negative)"; font-weight: normal; color: #555; }

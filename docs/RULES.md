@@ -167,7 +167,7 @@ Lucky and Glass chances are rolled with the seed when the hand is played; the pr
 ## Charms (consumables)
 
 Charms are one-use cards, like Balatro's tarot cards (ben, 2026-10-18). They live in `data/consumables.js`; `js/consumables.js` applies them.
-You hold up to **2** (`consumableSlots`). They come from Charm packs in the shop. Sell one for $1 in the shop.
+You hold up to **2** (`consumableSlots`); negative charms (from the Phantom joker) don't count toward that. They come from Charm packs in the shop. Sell one for $1 in the shop.
 Card charms work on cards you select on the board during a round: select the cards, then press **Use**. Money charms can be used any time.
 Changes to a card stay for the rest of the run.
 
@@ -273,6 +273,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Loan Shark | You can go into debt (see Debt above). At cash out, pay 20% interest on your debt. |
 | Rare | High Five | Each 5 played gives +5 mult. |
 | Unique | Recycle | Played and discarded cards go straight back into the draw pile (at random spots). Unlock: run out of cards in the draw pile. |
+| Unique | Phantom | At the start of each fight, add a negative copy of a random charm. Negative charms don't take up a charm slot. |
 
 **Deck jokers** (common, ben 2026-10-18): one per starting deck, unlocked by beating that deck.
 

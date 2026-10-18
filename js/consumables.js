@@ -1,4 +1,5 @@
-// Charms (consumables). No DOM code here. Held charm ids live in Game.state.consumables.
+// Charms (consumables). No DOM code here. Held charms live in Game.state.consumables as
+// { id, negative }. Negative charms (from the Phantom joker) don't take up a charm slot.
 const Consumables = {
   byId(id) {
     return window.SETTRY_CONSUMABLES.find((c) => c.id === id);
@@ -11,13 +12,13 @@ const Consumables = {
   },
 
   hasRoom() {
-    return Game.state.consumables.length < window.SETTRY_CONFIG.consumableSlots;
+    return Game.state.consumables.filter((c) => !c.negative).length < window.SETTRY_CONFIG.consumableSlots;
   },
 
   // Why the charm in slot k can't be used right now, or "" if it can.
   blocker(k) {
     const s = Game.state;
-    const c = Consumables.byId(s.consumables[k]);
+    const c = Consumables.byId(s.consumables[k]?.id);
     if (!c || s.phase === "lost" || s.phase === "won") return "Not now";
     if (c.target) {
       if (s.phase !== "round") return "Use during a round";
@@ -32,7 +33,7 @@ const Consumables = {
   use(k) {
     const s = Game.state;
     if (Consumables.blocker(k)) return;
-    const c = Consumables.byId(s.consumables[k]);
+    const c = Consumables.byId(s.consumables[k].id);
     s.consumables.splice(k, 1);
     const cards = c.target ? Game.selectedCards() : [];
     for (const card of cards) {
@@ -54,7 +55,7 @@ const Consumables = {
       note = ` +$${gain}.`;
     }
     if (c.action === "echo") {
-      s.consumables.push(s.lastConsumable);
+      s.consumables.push({ id: s.lastConsumable, negative: false });
       note = ` Created ${Consumables.byId(s.lastConsumable).name}.`;
     }
     if (c.action !== "echo") s.lastConsumable = c.id;

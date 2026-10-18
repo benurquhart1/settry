@@ -135,12 +135,13 @@ function renderChoose() {
 // Held charms, with Use (and Sell in the shop). Empty slots show as outlines.
 function renderCharms(selling) {
   const s = Game.state;
-  const slots = window.SETTRY_CONFIG.consumableSlots;
+  const slots = window.SETTRY_CONFIG.consumableSlots + s.consumables.filter((c) => c.negative).length;
   $("consumables").innerHTML = Array.from({ length: slots }, (_, k) => {
-    const id = s.consumables[k];
-    if (!id) return `<div class="charm empty">Charm slot</div>`;
+    const held = s.consumables[k];
+    if (!held) return `<div class="charm empty">Charm slot</div>`;
+    const id = held.id;
     const why = animating ? "Scoring" : Consumables.blocker(k);
-    return `<div class="held">${charmHtml(Consumables.byId(id))}
+    return `<div class="held">${charmHtml(Consumables.byId(id), held.negative ? "negative" : "")}
       <button class="use" data-use="${k}" ${why ? `disabled title="${why}"` : ""}>${why || "Use"}</button>
       ${selling ? `<button class="sell" data-sell-charm="${k}">Sell $${window.SETTRY_CONFIG.consumableSell}</button>` : ""}</div>`;
   }).join("");

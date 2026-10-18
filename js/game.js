@@ -16,7 +16,7 @@ const Game = {
       runDeck,                                // every card in your deck; carries over between rounds
       nextUid: runDeck.length,                // uid for the next card added to the deck
       jokers,                                 // held joker ids, applied left to right
-      consumables: [],                        // held charm ids (data/consumables.js)
+      consumables: [],                        // held charms, { id, negative } (data/consumables.js)
       lastConsumable: null,                   // last charm used, for Echo
       jokerSlots: Math.max(window.SETTRY_CONFIG.jokerSlotsStart, jokers.length),
       money: window.SETTRY_CONFIG.startMoney,
@@ -94,6 +94,12 @@ const Game = {
     const s = Game.state;
     const setting = (name) => Jokers.setting(name, s.jokers);
     // Recruit jokers add a random card to the deck first (rolled with the deck stream).
+    // Phantom adds a negative charm (one that doesn't take a slot).
+    const charms = Jokers.has(s.jokers, "negativeCharm").map((j) => {
+      const c = Consumables.roll(s.rng.deck);
+      s.consumables.push({ id: c.id, negative: true });
+      return `${j.name} added a negative ${c.name}.`;
+    });
     const added = Jokers.has(s.jokers, "addCard").map((j) => {
       const card = { ...Shop.packCard(j.effect, s.rng.deck), uid: s.nextUid++ };
       s.runDeck.push(card);
@@ -111,7 +117,7 @@ const Game = {
       playsLeft: setting("plays"),
       discardsLeft: setting("discards"),
       firstDiscardDone: false,                // for jokers that act on the round's first discard
-      message: added.join(" "),
+      message: [...added, ...charms].join(" "),
     });
   },
 
