@@ -91,16 +91,16 @@ const Shop = {
   // A random card for a pack. Numbers 1 to 4 like starting decks; with deckLimited, only cards
   // your starting deck could have. Shop packs: sometimes a wild (SETTRY_PACK_WILD_CHANCE).
   // Prizes with modChance: that chance of one wild or enhancement, picked at random.
-  packCard(p = {}) {
+  packCard(p = {}, random = Game.state.rng.pack) {
     const s = Game.state;
     const all = Deck.pool(p.deckLimited ? s.deckDef : {});
-    const card = { ...all[Rng.int(s.rng.pack, all.length)] };
+    const card = { ...all[Rng.int(random, all.length)] };
     const wilds = Object.keys(window.SETTRY_MODIFIERS);
     if (p.modChance === undefined) {
-      if (s.rng.pack() < window.SETTRY_PACK_WILD_CHANCE) card.mods = [wilds[Rng.int(s.rng.pack, wilds.length)]];
-    } else if (s.rng.pack() < p.modChance) {
+      if (random() < window.SETTRY_PACK_WILD_CHANCE) card.mods = [wilds[Rng.int(random, wilds.length)]];
+    } else if (random() < p.modChance) {
       const choices = [...wilds.map((m) => ["mod", m]), ...Object.keys(window.SETTRY_ENHANCEMENTS).map((e) => ["enh", e])];
-      const [kind, id] = choices[Rng.int(s.rng.pack, choices.length)];
+      const [kind, id] = choices[Rng.int(random, choices.length)];
       if (kind === "mod") card.mods = [id];
       else card.enh = id;
     }

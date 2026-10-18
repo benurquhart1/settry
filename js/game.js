@@ -93,6 +93,12 @@ const Game = {
   startRound() {
     const s = Game.state;
     const setting = (name) => Jokers.setting(name, s.jokers);
+    // Recruit jokers add a random card to the deck first (rolled with the deck stream).
+    const added = Jokers.has(s.jokers, "addCard").map((j) => {
+      const card = { ...Shop.packCard(j.effect, s.rng.deck), uid: s.nextUid++ };
+      s.runDeck.push(card);
+      return `${j.name} added a ${card.count} ${card.color} ${card.shading} ${card.shape}${card.enh ? ` (${window.SETTRY_ENHANCEMENTS[card.enh].name})` : ""}${card.mods ? ` (${card.mods.map((m) => window.SETTRY_MODIFIERS[m].name).join(", ")})` : ""}.`;
+    });
     s.pile = Deck.shuffle(s.runDeck, s.rng.shuffle);   // draw pile, top first
     Object.assign(s, {
       phase: "round",
@@ -105,7 +111,7 @@ const Game = {
       playsLeft: setting("plays"),
       discardsLeft: setting("discards"),
       firstDiscardDone: false,                // for jokers that act on the round's first discard
-      message: "",
+      message: added.join(" "),
     });
   },
 

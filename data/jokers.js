@@ -16,6 +16,8 @@
 //              (only when your money is above $0)
 //   loanShark  lets your money go below $0, down to (not reaching) `limit`; at cash out you pay
 //              `rate` of your debt (rounded up). Reach `limit`, or be below $0 without it, and you lose.
+//   addCard    at the start of each fight, add a random card to your deck (numbers 1 to 4).
+//              deckLimited: only cards your starting deck could have. modChance: chance of a wild or enhancement.
 //   none       no effect yet (still being designed)
 // `per` values (worked out by Hands.counts):
 //   timesPlayed  times this hand type has been played this game, counting this one
@@ -40,6 +42,9 @@ window.SETTRY_JOKERS = [
   { id: "plainJoker", name: "Plain Joker", rarity: "common", art: "+4",
     text: "+4 mult.",
     effect: { type: "addMult", amount: 4 }, unlocked: true },
+  { id: "newRecruit", name: "New Recruit", rarity: "common", art: "+🂠",
+    text: "At the start of each fight, add a random card to your deck.",
+    effect: { type: "addCard", modChance: 0 }, unlocked: true },
   { id: "creditUnion", name: "Credit Union", rarity: "common", art: "%",
     text: "At cash out, earn 20% interest on your money, up to $5.",
     effect: { type: "interest", rate: 0.2, max: 5 }, unlocked: true },
@@ -69,6 +74,9 @@ window.SETTRY_JOKERS = [
   { id: "numberfile", name: "Numberfile", rarity: "uncommon", art: "#",
     text: "+1 mult for each different number played.",
     effect: { type: "distinctNumbers", mult: 1 }, unlocked: true },
+  { id: "loyalRecruit", name: "Loyal Recruit", rarity: "uncommon", art: "+🂠",
+    text: "At the start of each fight, add a random card your starting deck could have to your deck.",
+    effect: { type: "addCard", deckLimited: true, modChance: 0 }, unlocked: true },
   { id: "bank", name: "Bank", rarity: "uncommon", art: "🏦",
     text: "At cash out, earn 10% interest on your money, up to $20.",
     effect: { type: "interest", rate: 0.1, max: 20 }, unlocked: true },
@@ -104,6 +112,9 @@ window.SETTRY_JOKERS = [
   { id: "rainbowSet", name: "Full Spectrum", rarity: "rare", art: "×5",
     text: "×5 mult if the hand is a set with every attribute different.",
     effect: { type: "allDifferentSet", mult: 5 }, unlocked: true },
+  { id: "eliteRecruit", name: "Elite Recruit", rarity: "rare", art: "+★",
+    text: "At the start of each fight, add a random modified card your starting deck could have to your deck.",
+    effect: { type: "addCard", deckLimited: true, modChance: 1 }, unlocked: true },
   { id: "treasury", name: "Treasury", rarity: "rare", art: "🏛",
     text: "At cash out, earn 5% interest on your money, with no limit.",
     effect: { type: "interest", rate: 0.05, max: null }, unlocked: true },

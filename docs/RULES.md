@@ -251,12 +251,14 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Common | Overtime | +1 hand each round. |
 | Common | Recycler | +1 discard each round. |
 | Common | Plain Joker | +4 mult. |
+| Common | New Recruit | At the start of each fight, add a random card (numbers 1 to 4) to your deck. |
 | Common | Credit Union | At cash out, earn 20% interest on your money, up to $5. |
 | Uncommon | Big Table | +2 cards on the board. |
 | Uncommon | Odd One Out | Earn $1 for each difference in the hand. |
 | Uncommon | Birds of a Feather | Earn $1 for each match in the hand. |
 | Uncommon | Shopkeeper | +1 joker for sale in the shop. |
 | Uncommon | Numberfile | +1 mult for each different number played. |
+| Uncommon | Loyal Recruit | At the start of each fight, add a random card your starting deck could have (e.g. only blue cards for the Blue deck). |
 | Uncommon | Bank | At cash out, earn 10% interest on your money, up to $20. |
 | Uncommon | Day Trader | At cash out: 50% chance your money ×1.25, 50% chance ×0.8 (only when above $0). |
 | Rare | Kaleidoscope | Multiply mult by the number of differences in the hand. |
@@ -265,6 +267,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Copycat | If your first discard of the round is 1 card, add a copy of it to your deck. |
 | Rare | Shredder | If your first discard of the round is 1 card, remove it from your deck. |
 | Rare | Full Spectrum | ×5 mult if the hand is a set with every attribute different. |
+| Rare | Elite Recruit | At the start of each fight, add a random card your starting deck could have, always with a wild or an enhancement. |
 | Rare | Treasury | At cash out, earn 5% interest on your money, with no limit. |
 | Rare | Gambler | At cash out: 80% chance your money ×1.3, 20% chance it drops to $0 (only when above $0). |
 | Rare | Loan Shark | You can go into debt (see Debt above). At cash out, pay 20% interest on your debt. |
