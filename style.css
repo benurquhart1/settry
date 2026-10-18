@@ -1,7 +1,10 @@
-body { font-family: system-ui, sans-serif; background: #f4f4f4; color: #111; margin: 16px; }
+/* One plain light look on purpose (theme comes later). */
+:root { color-scheme: light; }
+body { font-family: system-ui, sans-serif; background: #f4f4f4; color: #111; margin: 0;
+  padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 button { font-size: 15px; padding: 6px 12px; cursor: pointer; }
 button:disabled { cursor: default; }
-.card { width: 90px; height: 112px; padding: 4px; background: #fff; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+.card { width: 90px; height: 112px; max-width: 100%; padding: 4px; background: #fff; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; }
 button.card { cursor: pointer; }
 .card.sel { border-color: #f90; background: #fff6e5; }
 .card.empty { background: transparent; border-style: dashed; }
@@ -12,15 +15,18 @@ button.card { cursor: pointer; }
 #menu { max-width: 520px; text-align: center; }
 .picker { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .picker > button { font-size: 24px; }
+#deck-choice { min-width: 0; flex: 1; }
 .sample { display: flex; gap: 6px; justify-content: center; }
+.sample .card { width: 22%; height: auto; aspect-ratio: 90 / 112; }
 .seed { display: block; margin: 20px 0; }
 .seed input { font: inherit; padding: 4px 8px; text-transform: uppercase; }
 .big { font-size: 20px; padding: 10px 28px; }
 
 /* Round */
 .table { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
-#board { display: grid; grid-template-columns: repeat(4, 90px); gap: 8px; }
-aside { width: 260px; }
+#board { display: grid; grid-template-columns: repeat(4, minmax(0, 90px)); gap: 8px; }
+#board .card { width: 100%; height: auto; aspect-ratio: 90 / 112; }
+aside { width: 260px; max-width: 100%; }
 #hand-box { border: 2px solid #333; border-radius: 8px; padding: 12px; background: #fff; text-align: center; }
 .hand-name { font-size: 20px; font-weight: bold; }
 .hand-score { font-size: 18px; margin-top: 6px; }
