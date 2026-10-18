@@ -47,6 +47,7 @@ const Hands = {
   // then Steel cards left on the board apply, then each joker applies left to right.
   // ctx: { jokers: [ids], timesPlayed: {handId: n} for plays already made this game,
   //        held: board cards not being played (for Steel),
+  //        scores(card): false for cards a boss stops from scoring (they still make the hand),
   //        random: the game's random(), only when the hand is actually played }.
   // Chances (Lucky, Glass breaking) only roll with `random`; the preview shows the odds.
   score(cards, hand, id, ctx = {}) {
@@ -57,7 +58,9 @@ const Hands = {
     let mult = hand.mult;
     let money = 0;
     const roll = (odds) => ctx.random() < 1 / odds;
+    const scores = ctx.scores || (() => true);
     for (const card of cards) {
+      if (!scores(card)) { steps.push({ card, add: 0, points, mult, label: "doesn't score" }); continue; }
       const add = Hands.cardPoints(card);
       points += add;
       const e = enhs[card.enh] || {};
@@ -75,14 +78,14 @@ const Hands = {
       steps.push({ card, add, points, mult, label: labels.join(", ") });
     }
     const heldSteps = [];
-    for (const card of ctx.held || []) {
+    for (const card of (ctx.held || []).filter(scores)) {
       const x = enhs[card.enh]?.heldXMult;
       if (!x) continue;
       mult *= x;
       heldSteps.push({ card, points, mult, label: `×${x} mult` });
     }
     const counts = Jokers.counts(cards, id, ((ctx.timesPlayed || {})[id] || 0) + 1);
-    const j = Jokers.apply(ctx.jokers || [], counts, cards, points, mult, ctx.random);
+    const j = Jokers.apply(ctx.jokers || [], counts, cards.filter(scores), points, mult, ctx.random);
     return { steps, heldSteps, jokerSteps: j.steps, broken, cardPoints: points, cardMult: mult,
       points: j.points, baseMult: hand.mult, mult: j.mult, money: money + j.money, total: j.points * j.mult };
   },

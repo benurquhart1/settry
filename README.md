@@ -17,6 +17,7 @@ Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 - `data/hands.js`: hands you can play and what they score.
 - `data/jokers.js`: jokers, rarities and drop rates. `jokers.html` shows them.
 - `js/jokers.js`: applying joker effects.
+- `data/fights.js`: the 20 fights, opponents, targets, rewards and boss modifiers.
 - `data/modifiers.js`: card modifications such as the wild suit, and enhancements (mult, bonus, lucky, glass, steel).
 - `data/consumables.js`: charms (one-use cards, like tarots), applied by `js/consumables.js`.
 - `gallery.html`: every card in the deck.

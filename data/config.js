@@ -1,18 +1,11 @@
 // Run and round settings. Change numbers here; docs/RULES.md explains each one.
 window.SETTRY_CONFIG = {
-  // Run
-  antes: 8,            // beat the boss round of this ante to win the run
-  anteTargets: [100, 250, 600, 1500, 3500, 6500, 11500, 16500],   // base score target per ante
-  rounds: [            // the rounds in every ante, in order
-    { name: "Small round", targetMult: 1,   reward: 3 },
-    { name: "Big round",   targetMult: 1.5, reward: 5 },
-    { name: "Boss round",  targetMult: 2,   reward: 8 },   // boss effects to come
-  ],
+  // Run: fights, targets and rewards live in data/fights.js.
   startMoney: 5,
   moneyPerHandLeft: 1, // paid for each unused hand when a round is won
   // No standard interest (ben, 2026-10-18): it comes from the Credit Union, Bank and Treasury jokers.
 
-  // Shop
+  // Shop (only open after boss fights)
   shopJokerSlots: 2,   // jokers for sale at once (the Shopkeeper joker adds 1)
   shopPackSlots: 2,    // packs for sale at once
   rerollStart: 4,      // first reroll each shop costs this...
@@ -26,7 +19,8 @@ window.SETTRY_CONFIG = {
   maxPlay: 4,          // most cards one play can use (the Fifth Card joker raises it to 5)
   plays: 4,            // hands per round
   discards: 2,         // discards per round
-  jokerSlots: 5,       // most jokers you can hold
+  jokerSlotsStart: 2,  // jokers you can hold at the start of a run...
+  jokerSlotsMax: 6,    // ...+1 after each boss before the final one, up to this (none in endless mode)
   maxDiscardSize: 4,   // most cards one discard can throw away
   consumableSlots: 2, // most charms (consumables) you can hold
   consumableSell: 1,  // what selling a charm gives back

@@ -7,7 +7,7 @@ const Game = {
   // never changes which cards you draw.
   newRun(deckDef, seed, jokers = []) {
     const rng = {};
-    for (const stream of ["deck", "shuffle", "shop", "pack", "luck"]) rng[stream] = Rng.create(`${seed}/${stream}`);
+    for (const stream of ["deck", "shuffle", "shop", "pack", "luck", "fight"]) rng[stream] = Rng.create(`${seed}/${stream}`);
     const runDeck = Deck.runDeck(deckDef, rng.deck);
     Game.state = {
       seed,
@@ -18,20 +18,69 @@ const Game = {
       jokers,                                 // held joker ids, applied left to right
       consumables: [],                        // held charm ids (data/consumables.js)
       lastConsumable: null,                   // last charm used, for Echo
+      jokerSlots: Math.max(window.SETTRY_CONFIG.jokerSlotsStart, jokers.length),
       money: window.SETTRY_CONFIG.startMoney,
-      ante: 1,
-      roundIndex: 0,                          // 0 small, 1 big, 2 boss (see config.rounds)
+      fightNumber: 0,                         // the fight being chosen or played, from 1
+      endless: false,                         // true once you keep going after the last fight
       timesPlayed: {},                        // hand id -> times played this run
-      phase: "round",                         // round, cashout, shop, pack, lost, won
+      phase: "choose",                        // choose, round, cashout, shop, pack, lost, won
     };
+    Game.nextFight();
+  },
+
+  isBoss(n) {
+    return n % window.SETTRY_FIGHTS.bossEvery === 0;
+  },
+
+  // Base target for fight n: one per group of 4 fights, growing in endless mode.
+  baseTarget(n) {
+    const f = window.SETTRY_FIGHTS;
+    const g = Math.ceil(n / f.bossEvery) - 1;
+    const last = f.groupTargets.length - 1;
+    return g <= last ? f.groupTargets[g] : f.groupTargets[last] * f.endlessGrowth ** (g - last);
+  },
+
+  // Move on to the next fight and roll its two opponents.
+  nextFight() {
+    const s = Game.state;
+    const f = window.SETTRY_FIGHTS;
+    const n = ++s.fightNumber;
+    const random = s.rng.fight;
+    const pickTwo = (list) => {
+      const a = Rng.int(random, list.length);
+      const b = (a + 1 + Rng.int(random, list.length - 1)) % list.length;
+      return [list[a], list[b]];
+    };
+    const names = pickTwo(f.names);
+    const boss = Game.isBoss(n);
+    const kinds = boss ? pickTwo(window.SETTRY_BOSS_MODIFIERS).map((modifier) => ({ ...f.boss, modifier }))
+      : pickTwo(f.regular).sort((a, b) => a.reward - b.reward);
+    s.choices = kinds.map((k, i) => ({
+      name: names[i],
+      boss,
+      reward: k.reward,
+      modifier: k.modifier || null,
+      target: Math.round(Game.baseTarget(n) * k.targetMult * (k.modifier?.targetMult || 1)),
+    }));
+    s.phase = "choose";
+  },
+
+  chooseFight(i) {
+    const s = Game.state;
+    if (s.phase !== "choose" || !s.choices[i]) return;
+    s.fight = s.choices[i];
     Game.startRound();
   },
 
+  // The fight being played (or just played).
   roundInfo() {
-    const cfg = window.SETTRY_CONFIG;
-    const s = Game.state;
-    const r = cfg.rounds[s.roundIndex];
-    return { ...r, target: Math.round(cfg.anteTargets[s.ante - 1] * r.targetMult) };
+    return Game.state.fight;
+  },
+
+  // Does this card score in the current fight? (Boss "ban" modifiers stop some cards.)
+  scores(card) {
+    const d = Game.state.fight?.modifier?.debuff;
+    return !d || card[d.attribute] !== d.value;
   },
 
   // Shuffle the whole deck into a fresh draw pile and deal the board.
@@ -44,9 +93,9 @@ const Game = {
       board: s.pile.splice(0, setting("boardSize")),   // face-up cards; empty spots are null
       selected: [],                           // indices into board, in the order clicked
       used: new Set(),                        // uids of cards played or discarded this round
-      maxPlay: setting("maxPlay"),
+      maxPlay: Math.min(setting("maxPlay"), s.fight.modifier?.maxPlay || Infinity),
       score: 0,
-      target: Game.roundInfo().target,
+      target: s.fight.target,
       playsLeft: setting("plays"),
       discardsLeft: setting("discards"),
       firstDiscardDone: false,                // for jokers that act on the round's first discard
@@ -61,7 +110,7 @@ const Game = {
     const cfg = window.SETTRY_CONFIG;
     const s = Game.state;
     const lines = [
-      { label: `${Game.roundInfo().name} beaten`, amount: Game.roundInfo().reward },
+      { label: `${s.fight.name} beaten`, amount: s.fight.reward },
       { label: `${s.playsLeft} unused hand${s.playsLeft === 1 ? "" : "s"}`, amount: s.playsLeft * cfg.moneyPerHandLeft },
     ].filter((l) => l.amount > 0);
     let money = s.money + lines.reduce((t, l) => t + l.amount, 0);
@@ -97,6 +146,20 @@ const Game = {
     s.money += s.payout.total;
     s.payout = null;
     if (Game.checkDebt()) return;
+    const n = s.fightNumber;
+    // Each boss before the last fight gives +1 joker slot (not the final boss, not endless mode).
+    if (Game.isBoss(n) && n < window.SETTRY_FIGHTS.count)
+      s.jokerSlots = Math.min(window.SETTRY_CONFIG.jokerSlotsMax, s.jokerSlots + 1);
+    if (n === window.SETTRY_FIGHTS.count && !s.endless) s.phase = "won";
+    else if (Game.isBoss(n)) Shop.open();
+    else Game.nextFight();
+  },
+
+  // After winning the run: keep going with endless fights, starting at the shop.
+  goEndless() {
+    const s = Game.state;
+    if (s.phase !== "won") return;
+    s.endless = true;
     Shop.open();
   },
 
@@ -122,13 +185,9 @@ const Game = {
     return true;
   },
 
-  // Leave the shop: on to the next round, or the next ante after the boss.
-  nextRound() {
-    const s = Game.state;
-    const cfg = window.SETTRY_CONFIG;
-    s.roundIndex++;
-    if (s.roundIndex >= cfg.rounds.length) { s.roundIndex = 0; s.ante++; }
-    Game.startRound();
+  // Leave the shop: on to the next fight.
+  leaveShop() {
+    Game.nextFight();
   },
 
   sellJoker(k) {
@@ -158,8 +217,13 @@ const Game = {
     const s = Game.state;
     const n = s.selected.length;
     return n >= window.SETTRY_CONFIG.minPlay && n <= s.maxPlay
-      ? Hands.best(Game.selectedCards(), { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards() })
+      ? Hands.best(Game.selectedCards(), Game.scoreContext())
       : null;
+  },
+
+  scoreContext() {
+    const s = Game.state;
+    return { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards(), scores: Game.scores };
   },
 
   // Board cards that are not selected (Steel cards work from here).
@@ -185,7 +249,7 @@ const Game = {
     if (!Game.canPlay()) return null;
     const preview = Game.selectedHand();
     const scored = Hands.score(Game.selectedCards(), window.SETTRY_HANDS[preview.id], preview.id,
-      { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards(), random: s.rng.luck });
+      { ...Game.scoreContext(), random: s.rng.luck });
     return { ...preview, ...scored };
   },
 
@@ -253,9 +317,8 @@ const Game = {
   checkEnd() {
     const s = Game.state;
     if (s.score >= s.target) {
-      const last = s.ante === window.SETTRY_CONFIG.antes && s.roundIndex === window.SETTRY_CONFIG.rounds.length - 1;
-      s.phase = last ? "won" : "cashout";
-      if (!last) s.payout = Game.earnings();
+      s.phase = "cashout";
+      s.payout = Game.earnings();
     } else if (s.playsLeft === 0) s.phase = "lost";
   },
 };

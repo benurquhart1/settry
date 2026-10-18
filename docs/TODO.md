@@ -8,8 +8,8 @@ Things ben asked to come back to later.
 - [ ] **Black, Spade, Heart and Club Joker** effects: TBD.
 - [ ] **Legendary jokers**: none yet.
 - [ ] **Set of 5**: ben will explain how it works.
-- [ ] **Boss rounds**: special rules for each boss.
-- [ ] **Tune ante targets** once more jokers exist.
+- [ ] **Scaling**: fight targets and rewards are placeholders (ben will work on it), including endless mode.
+- [ ] **More boss modifiers**: ben will think of more.
 - [ ] **Polka dot deck**: ben listed a polka dot deck; the 4th shading is checkered (polka dots mark wild shading), so it's a Checkered deck for now.
 - [ ] **12-card board** (ben, 2026-10-18): trying 12 instead of 16; see how it plays (`boardSize`).
 - [ ] **Charms in the shop**: for now charms only come from Charm packs; Balatro also sells tarots singly.

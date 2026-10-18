@@ -1,6 +1,6 @@
 # Settry rules
 
-Settry mixes Set (find matching trios of cards) with Balatro (a run of rounds, a deck you shape, and jokers that bend the rules).
+Settry mixes Set (find matching trios of cards) with Balatro (a run of fights, a deck you shape, and jokers that bend the rules).
 This file is the source of truth for how the game should play. The numbers live in `data/config.js`; jokers live in `data/jokers.js`.
 When a rule changes, update this file and the data file together.
 
@@ -56,31 +56,44 @@ More hands, including a set of 5, are to come.
 
 ## The run
 
-A run plays like Balatro (ben, 2026-10-18). Numbers live in `data/config.js`.
+A run is a ladder of **20 fights**, then endless mode (ben, 2026-10-18, moving away from Balatro's antes). Fights, targets and rewards live in `data/fights.js`; other numbers in `data/config.js`.
 
-- You start with **$5** and your starting deck. Your deck carries over from round to round, and it's fully reshuffled at the start of each round.
-- The run has **8 antes**, each with **3 rounds**: small, big and boss. Beat the boss of ante 8 to win the run. Fail to reach a round's target and the run is over.
+- You start with **$5** and your starting deck. Your deck carries over from fight to fight, and it's fully reshuffled at the start of each fight.
+- Before each fight you **choose one of 2 opponents**. Each shows its target (points needed), its reward, and any modifier.
+- **Every 4th fight is a boss** (fights 4, 8, 12, 16 and 20), with 3 regular fights in between. Fail to reach a fight's target and the run is over.
+- Beat fight 20 to win the run. Then you can keep going in **endless mode** (like Balatro), where targets keep growing.
 
-| Round | Target | Reward |
-|-------|--------|--------|
-| Small | ante target × 1 | $3 |
-| Big | ante target × 1.5 | $5 |
-| Boss | ante target × 2 | $8 |
+| Fight | Opponents on offer | Reward | Target |
+|-------|--------------------|--------|--------|
+| Regular | two of: $3, $5, $8 (always different) | as shown | base × 1, × 1.3, × 1.7 |
+| Boss | two bosses with different modifiers | $10 | base × 2 (Giant × 1.5 more) |
 
-Ante targets (placeholders, to tune): 100, 250, 600, 1500, 3500, 6500, 11500, 16500.
+Base targets (placeholders, scaling to be worked on): 100 for fights 1-4, 300 for 5-8, 800 for 9-12, 2000 for 13-16, 5000 for 17-20, then × 2.5 for each further group of 4 in endless mode.
 
-When you win a round you also get **$1 for each unused hand** (like Balatro).
+**Boss modifiers** (`SETTRY_BOSS_MODIFIERS`; usually only bosses have one, more to come from ben):
+
+| Modifier | Effect |
+|----------|--------|
+| Red / Green / Blue / Black Ban | Cards of that color don't score. |
+| Heart / Diamond / Spade / Club Ban | Cards of that suit don't score. |
+| Giant | The target is 1.5 times bigger. |
+| Short Hands | You can only play up to 3 cards. |
+
+A card that doesn't score still counts toward making the hand, but adds no points, its enhancement does nothing, and jokers ignore it. It looks greyed out on the board. A wild card only counts as banned if its own value is the banned one.
+
+**Joker slots** start at **2**. Each boss before the final one (fights 4, 8, 12 and 16) gives **+1 slot**, up to **6**. The final boss and endless mode don't add slots.
+
+When you win a fight you also get **$1 for each unused hand** (like Balatro).
 There is **no standard interest** (ben, 2026-10-18): interest only comes from the Credit Union, Bank and Treasury jokers.
 At cash out, after the reward and unused hands are added, money jokers apply left to right, each on the running balance: interest, Day Trader and Gambler rolls, and Loan Shark's debt interest. Money amounts are rounded to whole dollars (interest down, debt interest up).
 
 **Debt.** Your money can't go below $0 unless you hold the Loan Shark joker; with it, you can spend down to -$49. You lose the run if your money reaches -$50, or if you are below $0 without the Loan Shark (for example after selling it while in debt).
-Boss rounds don't have special rules yet.
 
 ## The shop
 
-After each round you cash out and visit the shop (`js/shop.js`, packs in `data/packs.js`).
+The shop only opens **after boss fights** (ben, 2026-10-18), including in endless mode (`js/shop.js`, packs in `data/packs.js`). After a regular fight you cash out and go straight to choosing the next opponent.
 
-- **2 jokers** for sale (the Shopkeeper joker adds a third). Prices: common $4, uncommon $6, rare $10, unique $16. You can hold 5 jokers.
+- **2 jokers** for sale (the Shopkeeper joker adds a third). Prices: common $4, uncommon $6, rare $10, unique $16. You can only buy one if you have a free joker slot.
 - **2 packs** for sale, picked at random by how common each pack is. Buying a pack opens it: choose from its options or skip.
 - **Reroll** replaces the jokers for sale (not the packs). The first reroll in each shop costs $4, then $1 more each time.
 - **Sell** a joker for half its price, rounded down (at least $1), while in the shop.
@@ -194,7 +207,7 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 2. Select 2 to 4 cards (5 with Fifth Card). If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
 3. Or select 1 to 4 cards and press **Discard** to swap them.
 4. Played and discarded cards are replaced from the draw pile. When the pile is empty, their spots stay empty.
-5. Reach the round's target within 4 hands to win it.
+5. Reach the fight's target within 4 hands to win it.
 
 **View deck** shows every card in your deck, sortable by color, number, shape or shading. Faded cards are used, outlined ones are on the board.
 
@@ -202,7 +215,7 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 
 Jokers live in `data/jokers.js` (effects are data; `js/jokers.js` applies them). `jokers.html` shows every joker card.
 A joker card has art on the top half, its name in the middle and a text box at the bottom. Names and art are placeholders.
-You can hold up to 5 (`jokerSlots`). Scoring jokers apply **left to right**, after the cards have added their points.
+You start with 2 joker slots and gain more from bosses (see The run). Scoring jokers apply **left to right**, after the cards have added their points.
 Buy them in the shop or find them in Buffoon packs. You can also pick test jokers on the start menu to start a run with.
 
 **Drop rates** (by rarity): common 60%, uncommon 25%, rare 12%, unique 3%. Legendary jokers never drop.
@@ -262,6 +275,4 @@ Unlocks are listed but not tracked yet: that needs user accounts and saves (see 
 ## Open questions
 
 - Do cards add their own points (like Balatro card chips), or does only the hand score?
-- Round targets per ante.
-- What happens between rounds (shop, adding/removing cards from the run deck)?
 - Multiplayer: does "each person" mean players take turns on one board, or each has their own?

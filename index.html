@@ -17,7 +17,7 @@
     </div>
     <label class="seed">Seed <input id="seed" size="12" spellcheck="false"></label>
     <h3>Test jokers</h3>
-    <p class="hint">Optional: start the run already holding up to 5 of these. They apply left to right in the order picked.</p>
+    <p class="hint">Optional: start the run already holding up to 6 of these (your joker slots grow to fit). They apply left to right in the order picked.</p>
     <div id="joker-pick" class="joker-row"></div>
     <button id="start" class="big">Start game</button>
     <p><a href="gallery.html">See all cards</a> · <a href="jokers.html">See all jokers</a></p>
@@ -28,6 +28,11 @@
     <div class="held-row">
       <div id="jokers" class="joker-row small"></div>
       <div id="consumables" class="charm-row"></div>
+    </div>
+
+    <div id="choose-view" class="panel" hidden>
+      <h2 id="choose-title"></h2>
+      <div id="choices" class="offers"></div>
     </div>
 
     <div id="round-view" class="table">
@@ -49,7 +54,7 @@
     </div>
 
     <div id="cashout-view" class="panel" hidden>
-      <h2>Round won</h2>
+      <h2>Fight won</h2>
       <div id="cashout-lines"></div>
       <button id="cash-out" class="big">Cash out</button>
     </div>
@@ -60,7 +65,7 @@
       <div id="shop-packs" class="offers"></div>
       <div class="actions">
         <button id="reroll">Reroll</button>
-        <button id="next-round" class="big">Next round</button>
+        <button id="next-round" class="big">Next fight</button>
         <button id="view-deck-2">View deck</button>
       </div>
     </div>
@@ -75,6 +80,7 @@
     <div id="end-view" class="panel" hidden>
       <h2 id="end-title"></h2>
       <p id="end-text"></p>
+      <button id="endless" class="big" hidden>Endless mode</button>
       <button id="end-menu" class="big">Back to menu</button>
     </div>
   </section>
@@ -99,6 +105,7 @@
   <script src="data/jokers.js"></script>
   <script src="data/modifiers.js"></script>
   <script src="data/hands.js"></script>
+  <script src="data/fights.js"></script>
   <script src="data/consumables.js"></script>
   <script src="js/rng.js"></script>
   <script src="js/deck.js"></script>

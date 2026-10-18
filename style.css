@@ -110,3 +110,11 @@ dialog { max-width: 90vw; }
 #board .card { position: relative; }
 #board .card.held-scoring { box-shadow: 0 0 0 3px #424242; }
 #board .card.held-scoring::after { content: attr(data-label); position: absolute; top: 2px; right: 2px; background: #424242; color: #fff; font-size: 11px; font-weight: bold; padding: 1px 4px; border-radius: 4px; }
+
+/* Choosing an opponent */
+.opponent { width: 200px; display: grid; gap: 6px; padding: 12px; border: 2px solid #999; border-radius: 10px; background: #fff; }
+.opponent h3 { margin: 0; }
+.opponent.boss { border-color: #c62828; }
+.opponent.boss small { color: #c62828; }
+.opponent .modifier { color: #c62828; font-size: 14px; }
+.card.banned { filter: grayscale(1); opacity: 0.6; }

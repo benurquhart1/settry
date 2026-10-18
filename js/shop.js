@@ -1,4 +1,4 @@
-// The shop between rounds, Balatro-style. No DOM code here.
+// The shop, open after each boss fight. No DOM code here.
 // State lives in Game.state.shop (offers) and Game.state.pack (a pack being opened).
 const Shop = {
   open() {
@@ -34,7 +34,7 @@ const Shop = {
   canBuyJoker(i) {
     const s = Game.state;
     const o = s.shop.jokers[i];
-    return o && !o.sold && Game.canSpend(o.price) && s.jokers.length < window.SETTRY_CONFIG.jokerSlots;
+    return o && !o.sold && Game.canSpend(o.price) && s.jokers.length < s.jokerSlots;
   },
 
   buyJoker(i) {
@@ -94,7 +94,7 @@ const Shop = {
     const o = s.pack?.options[n];
     if (!o || o.taken || s.pack.picksLeft <= 0) return false;
     if (o.charm) return Consumables.hasRoom();
-    return !o.joker || s.jokers.length < window.SETTRY_CONFIG.jokerSlots;
+    return !o.joker || s.jokers.length < s.jokerSlots;
   },
 
   pick(n) {

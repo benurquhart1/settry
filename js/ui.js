@@ -27,7 +27,7 @@ $("joker-pick").addEventListener("click", (e) => {
   if (!el) return;
   const id = el.dataset.joker;
   if (pickedJokers.includes(id)) pickedJokers = pickedJokers.filter((x) => x !== id);
-  else if (pickedJokers.length < window.SETTRY_CONFIG.jokerSlots) pickedJokers.push(id);
+  else if (pickedJokers.length < window.SETTRY_CONFIG.jokerSlotsMax) pickedJokers.push(id);
   renderJokerPick();
 });
 
@@ -67,7 +67,7 @@ function handBox(hand, shown) {
   const total = shown && !shown.done ? "" : ` = ${hand.total}`;
   const enhs = window.SETTRY_ENHANCEMENTS;
   const cardLines = [
-    ...hand.steps.filter((st) => st.label).map((st) => `<div>${enhs[st.card.enh].name}: ${st.label}</div>`),
+    ...hand.steps.filter((st) => st.label).map((st) => `<div>${Game.scores(st.card) ? enhs[st.card.enh].name : "Banned card"}: ${st.label}</div>`),
     ...hand.heldSteps.map((st) => `<div>${enhs[st.card.enh].name} on the board: ${st.label}</div>`),
   ].join("");
   const jokers = hand.jokerSteps.map((st) => `<div>${Jokers.byId(st.joker).name}: ${st.label}</div>`).join("");
@@ -83,30 +83,49 @@ function render() {
   const s = Game.state;
   const cfg = window.SETTRY_CONFIG;
   const r = Game.roundInfo();
-  const where = s.phase === "shop" || s.phase === "pack" ? `Shop after the ${r.name.toLowerCase()}` : `${r.name} · Target ${r.target}`;
-  $("status").innerHTML = `<b>Ante ${s.ante}/${cfg.antes}</b> · ${where} · <b>${s.money < 0 ? `-$${-s.money}` : `$${s.money}`}</b> · Seed ${s.seed}`;
+  const total = window.SETTRY_FIGHTS.count;
+  const fight = s.endless ? `Endless fight ${s.fightNumber}` : `Fight ${s.fightNumber}/${total}`;
+  const where = s.phase === "shop" || s.phase === "pack" ? "Shop"
+    : s.phase === "choose" ? "Choose your opponent"
+    : `vs ${r.name}${r.boss ? " (boss)" : ""} · Target ${r.target}`;
+  $("status").innerHTML = `<b>${fight}</b> · ${where} · <b>${s.money < 0 ? `-$${-s.money}` : `$${s.money}`}</b> · Jokers ${s.jokers.length}/${s.jokerSlots} · Seed ${s.seed}`;
   const selling = s.phase === "shop" || s.phase === "pack";
   $("jokers").innerHTML = s.jokers.map((id, k) => `<div class="held">${jokerHtml(Jokers.byId(id))}` +
     `${selling ? `<button class="sell" data-k="${k}">Sell $${Jokers.sellPrice(id)}</button>` : ""}</div>`).join("") ||
-    `<p class="hint">No jokers yet (${s.jokers.length}/${cfg.jokerSlots}).</p>`;
+    `<p class="hint">No jokers yet (${s.jokers.length}/${s.jokerSlots}).</p>`;
   renderCharms(selling);
+  $("choose-view").hidden = s.phase !== "choose";
   $("round-view").hidden = s.phase !== "round";
   $("cashout-view").hidden = s.phase !== "cashout";
   $("shop-view").hidden = s.phase !== "shop";
   $("pack-view").hidden = s.phase !== "pack";
   $("end-view").hidden = !(s.phase === "lost" || s.phase === "won");
+  if (s.phase === "choose") renderChoose();
   if (s.phase === "round") renderRound();
   if (s.phase === "cashout") renderCashout();
   if (s.phase === "shop") renderShop();
   if (s.phase === "pack") renderPack();
   if (s.phase === "lost") {
     $("end-title").textContent = "Run over";
-    $("end-text").textContent = s.lostReason || `You scored ${s.score} of ${s.target} in the ${r.name.toLowerCase()} of ante ${s.ante}.`;
+    $("end-text").textContent = s.lostReason || `You scored ${s.score} of ${s.target} against ${r.name} in fight ${s.fightNumber}.`;
   }
   if (s.phase === "won") {
     $("end-title").textContent = "You beat the run!";
-    $("end-text").textContent = `All ${cfg.antes} antes cleared with the ${s.deckDef.name.toLowerCase()}, finishing with $${s.money}.`;
+    $("end-text").textContent = `All ${total} fights won with the ${s.deckDef.name.toLowerCase()}, finishing with $${s.money}. Keep going in endless mode, or head back to the menu.`;
   }
+  $("endless").hidden = s.phase !== "won";
+}
+
+// The two opponents on offer for the next fight.
+function renderChoose() {
+  const s = Game.state;
+  $("choose-title").textContent = `${Game.isBoss(s.fightNumber) ? "Boss fight" : "Fight"} ${s.fightNumber}: choose your opponent`;
+  $("choices").innerHTML = s.choices.map((c, i) => `<div class="opponent${c.boss ? " boss" : ""}">
+      <h3>${c.name}${c.boss ? " <small>Boss</small>" : ""}</h3>
+      <div>Target <b>${c.target}</b></div>
+      <div>Reward <b>$${c.reward}</b></div>
+      ${c.modifier ? `<div class="modifier"><b>${c.modifier.name}:</b> ${c.modifier.text}</div>` : `<div class="hint">No modifier</div>`}
+      <button data-choose="${i}" class="big">Fight</button></div>`).join("");
 }
 
 // Held charms, with Use (and Sell in the shop). Empty slots show as outlines.
@@ -132,13 +151,13 @@ function renderRound() {
     const i = s.selected[n];
     if (i === undefined) return `<div class="card empty"></div>`;
     const c = s.board[i];
-    return `<button class="card" data-i="${i}" title="${c.id}">${cardSvg(c)}<span class="add">+${Hands.cardPoints(c)}</span></button>`;
+    return `<button class="card${Game.scores(c) ? "" : " banned"}" data-i="${i}" title="${c.id}">${cardSvg(c)}<span class="add">+${Game.scores(c) ? Hands.cardPoints(c) : 0}</span></button>`;
   });
   $("picked").innerHTML = slots.join("");
 
   $("board").innerHTML = s.board
     .map((c, i) => c
-      ? `<button class="card${s.selected.includes(i) ? " picked" : ""}" data-i="${i}" title="${c.id}">${cardSvg(c)}</button>`
+      ? `<button class="card${s.selected.includes(i) ? " picked" : ""}${Game.scores(c) ? "" : " banned"}" data-i="${i}" title="${c.id}">${cardSvg(c)}</button>`
       : `<div class="card empty"></div>`)
     .join("");
 
@@ -248,12 +267,14 @@ function renderPack() {
 
 $("cash-out").onclick = () => { Game.cashOut(); render(); };
 $("reroll").onclick = () => { Shop.reroll(); render(); };
-$("next-round").onclick = () => { Game.nextRound(); render(); };
+$("next-round").onclick = () => { Game.leaveShop(); render(); };
+$("endless").onclick = () => { Game.goEndless(); render(); };
 $("skip-pack").onclick = () => { Shop.closePack(); render(); };
 $("game").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b) return;
-  if (b.dataset.buyJoker) Shop.buyJoker(Number(b.dataset.buyJoker));
+  if (b.dataset.choose) Game.chooseFight(Number(b.dataset.choose));
+  else if (b.dataset.buyJoker) Shop.buyJoker(Number(b.dataset.buyJoker));
   else if (b.dataset.buyPack) Shop.buyPack(Number(b.dataset.buyPack));
   else if (b.dataset.pick) Shop.pick(Number(b.dataset.pick));
   else if (b.dataset.k) Game.sellJoker(Number(b.dataset.k));
