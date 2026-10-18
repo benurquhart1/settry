@@ -6,11 +6,11 @@ const SHAPES = {
   club: '<path d="M12 2.2A4.6 4.6 0 0 1 15.6 9.7 4.6 4.6 0 1 1 13.3 17.4L14.4 22H9.6L10.7 17.4A4.6 4.6 0 1 1 8.4 9.7 4.6 4.6 0 0 1 12 2.2Z"/>',
 };
 
-// Symbol positions (top-left corners) inside an 80x100 card, by count.
+// Symbol positions (top-left corner, optional scale) inside an 80x100 card, by count.
 const LAYOUTS = {
-  1: [[27, 37]],
+  1: [[14, 24, 2.2]],
   2: [[27, 20], [27, 54]],
-  3: [[27, 8], [27, 37], [27, 66]],
+  3: [[27, 20], [11, 54], [43, 54]],
   4: [[11, 20], [43, 20], [11, 54], [43, 54]],
 };
 
@@ -26,8 +26,8 @@ function addPatterns() {
 function cardSvg(card) {
   const col = window.SETTRY_COLORS[card.color];
   const fill = card.shading === "solid" ? col : card.shading === "empty" ? "none" : `url(#${card.shading}-${card.color})`;
-  const symbols = LAYOUTS[card.count].map(([x, y]) =>
-    `<g transform="translate(${x} ${y})" fill="${fill}" stroke="${col}" stroke-width="1.5" stroke-linejoin="round">${SHAPES[card.shape]}</g>`);
+  const symbols = LAYOUTS[card.count].map(([x, y, scale = 1]) =>
+    `<g transform="translate(${x} ${y}) scale(${scale})" fill="${fill}" stroke="${col}" stroke-width="${1.5 / scale}" stroke-linejoin="round">${SHAPES[card.shape]}</g>`);
   return `<svg viewBox="0 0 80 100">${symbols.join("")}</svg>`;
 }
 
