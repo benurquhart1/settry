@@ -40,9 +40,11 @@ const Hands = {
     set4: (c, r) => c.length === 4 && Deck.isSet(c, r),
   },
 
-  // Points a card adds when it scores: its number, plus 30 for a Bonus card, plus what it gained (Workout).
-  cardPoints(card) {
-    return card.count + (window.SETTRY_ENHANCEMENTS[card.enh]?.points || 0) + (card.bonus || 0);
+  // Points a card adds when it scores: its number, plus 30 for a Bonus card (more with Polish),
+  // plus what it gained (Workout).
+  cardPoints(card, rules = {}) {
+    const bonus = window.SETTRY_ENHANCEMENTS[card.enh]?.points;
+    return card.count + (bonus ? bonus + (rules.enhBoost?.[card.enh] || 0) : 0) + (card.bonus || 0);
   },
 
   // Scores a hand Balatro-style: start from the hand's points and mult, then each card,
@@ -71,11 +73,11 @@ const Hands = {
       if (!scores(card)) { steps.push({ card, index, add: 0, points, mult, label: "doesn't score" }); continue; }
       const times = 1 + (index === 0 ? rules.retriggerFirst || 0 : 0) + (index === cards.length - 1 ? rules.retriggerLast || 0 : 0);
       for (let t = 0; t < times; t++) {
-        const add = Hands.cardPoints(card);
+        const add = Hands.cardPoints(card, rules);
         points += add;
         const e = enhs[card.enh] || {};
         const labels = t ? ["again"] : [];
-        if (e.mult) { mult += e.mult; labels.push(`+${e.mult} mult`); }
+        if (e.mult) { const m = e.mult + (rules.enhBoost?.[card.enh] || 0); mult += m; labels.push(`+${m} mult`); }
         if (card.bonusMult) { mult += card.bonusMult; labels.push(`+${card.bonusMult} mult (gained)`); }
         if (e.luckyMult) {
           if (!ctx.random) labels.push(`${luck} in ${e.luckyMult.odds}: +${e.luckyMult.mult} mult, ${luck} in ${e.luckyMoney.odds}: $${e.luckyMoney.money}`);

@@ -156,7 +156,7 @@ function renderRound() {
     const i = s.selected[n];
     if (i === undefined) return `<div class="card empty"></div>`;
     const c = s.board[i];
-    return `<button class="card${Game.scores(c) ? "" : " banned"}" data-i="${i}" title="${c.id}">${cardSvg(c)}<span class="add">+${Game.scores(c) ? Hands.cardPoints(c) : 0}</span></button>`;
+    return `<button class="card${Game.scores(c) ? "" : " banned"}" data-i="${i}" title="${c.id}">${cardSvg(c)}<span class="add">+${Game.scores(c) ? Hands.cardPoints(c, Game.rules()) : 0}</span></button>`;
   });
   $("picked").innerHTML = slots.join("");
 

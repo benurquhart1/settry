@@ -28,10 +28,11 @@ const Jokers = {
 
   // How held jokers bend the rules, for Deck.isSet, Hands.identical and Hands.score:
   // { interchange: {attribute: [[a, b], ...]}, ignore: [attributes], lookalike, setMaster,
-  //   retriggerFirst, retriggerLast (extra times), glassMult, luckyFactor }.
+  //   retriggerFirst, retriggerLast (extra times), glassMult, luckyFactor,
+//   enhBoost: {enhancement: extra, ...} (Polish: Mult cards +3 mult, Bonus cards +20 points) }.
   rules(jokerIds) {
     const r = { interchange: {}, ignore: [], lookalike: false, setMaster: false,
-      retriggerFirst: 0, retriggerLast: 0, glassMult: null, luckyFactor: 1 };
+      retriggerFirst: 0, retriggerLast: 0, glassMult: null, luckyFactor: 1, enhBoost: {} };
     for (const { effect: e } of Jokers.effects(jokerIds)) {
       if (e.type === "interchange") r.interchange[e.attribute] = e.pairs;
       if (e.type === "ignoreAttribute") r.ignore.push(e.attribute);
@@ -40,13 +41,14 @@ const Jokers = {
       if (e.type === "retrigger") r[e.which === "first" ? "retriggerFirst" : "retriggerLast"]++;
       if (e.type === "glassMult") r.glassMult = Math.max(r.glassMult || 0, e.mult);
       if (e.type === "luckyBoost") r.luckyFactor *= e.factor;
+      if (e.type === "enhBoost") for (const [k, v] of Object.entries(e.boost)) r.enhBoost[k] = (r.enhBoost[k] || 0) + v;
     }
     return r;
   },
 
   // Differences and matches in a played hand (see SETTRY_JOKER_GLOSSARY in data/jokers.js),
   // plus the other numbers and conditions jokers use (`per` and `when` in data/jokers.js).
-  // ctx: { timesPlayed, rules, pile, firstHand, lastHand, stats } as in Hands.score.
+  // ctx: { timesPlayed, rules, pile, firstHand, lastHand, stats, held, discardsUsed, money, charms, boss } as in Hands.score.
   counts(cards, handId, ctx = {}) {
     const st = ctx.stats || {};
     const played = (k) => cards.map((c) => Deck.options(c, k, ctx.rules));
@@ -62,7 +64,22 @@ const Jokers = {
       streak: st.streak || 0,
       set4Played: (st.set4Played || 0) + (handId === "set4" ? 1 : 0),
       veteran: st.veteran ?? 1,
+      pipSum: cards.reduce((t, c) => t + c.count, 0),
+      held: (ctx.held || []).length,
+      discardsUsed: ctx.discardsUsed || 0,
+      moneyFives: Math.max(0, Math.floor((ctx.money || 0) / 5)),
+      charmsHeld: ctx.charms || 0,
+      wildCards: cards.filter((c) => (c.mods || []).length).length,
+      fibonacci: [0, 1, 1, 2, 3, 5][cards.length] || 1,
       when: {
+        set3: handId === "set3",
+        anySet: handId.startsWith("set"),
+        threeKind: handId === "threeKind",
+        twoPair: handId === "twoPair",
+        smallHand: cards.length <= 2,
+        sameShape: cards.length >= 2 && Deck.canBeSame(played("shape")),
+        sameNumber: cards.length >= 2 && Deck.canBeSame(played("count")),
+        boss: !!ctx.boss,
         firstHand: !!ctx.firstHand,
         lastHand: !!ctx.lastHand,
         pileEmpty: ctx.pile === 0,
@@ -91,8 +108,10 @@ const Jokers = {
   },
 
   // Played cards whose attribute has this value (a wild card counts as every value).
+  // `value` may be an array of values (Even Steven: 2 or 4).
   cardsWith(cards, attribute, value) {
-    return cards.filter((c) => c[attribute] === value || Deck.isWild(c, attribute));
+    const values = [].concat(value);
+    return cards.filter((c) => values.includes(c[attribute]) || Deck.isWild(c, attribute));
   },
 
   // Scoring steps for the held jokers, left to right, after the cards have added their points.
@@ -111,6 +130,12 @@ const Jokers = {
       if (e.type === "addPoints" && n) { points += n; step(id, `+${n} points`); }
       if (e.type === "mulMult") { mult = round(mult * n); step(id, `×${round(n)} mult`); }
       if (e.type === "money" && n) { money += n; step(id, `+$${n}`); }
+      if (e.type === "randomMult") {
+        if (!random) { step(id, `+${e.min} to +${e.max} mult`); continue; }
+        const k = e.min + Rng.int(random, e.max - e.min + 1);
+        mult += k;
+        step(id, `+${k} mult`);
+      }
       if (e.type === "allDifferentSet" && counts.allDifferentSet) { mult *= e.mult; step(id, `×${e.mult} mult`); }
       if (e.type === "distinctNumbers") {
         const k = new Set(cards.filter((c) => !Deck.isWild(c, "count")).map((c) => c.count)).size;

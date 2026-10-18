@@ -33,8 +33,12 @@ const Consumables = {
   use(k) {
     const s = Game.state;
     if (Consumables.blocker(k)) return;
-    const c = Consumables.byId(s.consumables[k].id);
+    const held = s.consumables[k];
+    const c = Consumables.byId(held.id);
     s.consumables.splice(k, 1);
+    // Double Dip: a 1 in 2 chance (each) to keep the charm for one more use. The kept copy can't repeat again.
+    const kept = !held.again && Jokers.has(s.jokers, "charmAgain").some((j) => s.rng.luck() < j.effect.chance);
+    if (kept) s.consumables.splice(k, 0, { ...held, again: true });
     const cards = c.target ? Game.selectedCards() : [];
     for (const card of cards) {
       if (c.action === "paint") card.color = c.color;
@@ -60,7 +64,7 @@ const Consumables = {
     }
     if (c.action !== "echo") s.lastConsumable = c.id;
     s.stats.charmsUsed++;
-    s.message = `Used ${c.name}.${note}`;
+    s.message = `Used ${c.name}.${note}${kept ? " Double Dip: you can use it once more." : ""}`;
   },
 
   sell(k) {

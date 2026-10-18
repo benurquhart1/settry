@@ -272,6 +272,34 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Gambler | At cash out: 80% chance your money ×1.3, 20% chance it drops to $0 (only when above $0). |
 | Rare | Loan Shark | You can go into debt (see Debt above). At cash out, pay 20% interest on your debt. |
 | Rare | High Five | Each 5 played gives +5 mult. |
+| Common | Solid Ground | Each solid card played gives +10 points. |
+| Common | Empty Handed | Each empty card played gives +2 mult. |
+| Common | Pinstripe | Each striped card played gives +1 mult and +5 points. |
+| Common | Checkmate | Each checkered card played has a 1 in 3 chance to earn $1. |
+| Common | Even Steven | Each 2 or 4 played gives +2 mult. |
+| Common | Odd Job | Each 1 or 3 played gives +12 points. |
+| Common | Top Heavy | Each 4 played gives +3 mult. |
+| Common | Abacus | +3 points for every pip played (the sum of the played numbers × 3). |
+| Common | Flush | +6 mult if every played card has the same shape (2 or more cards). |
+| Common | Number Match | +5 mult if every played card has the same number (2 or more cards). |
+| Common | Set Piece | +4 mult when you play a set of 3. |
+| Common | Square Deal | +8 mult when you play a set of 4. |
+| Common | Trio | +12 mult when you play three of a kind. |
+| Common | Double Date | +10 mult when you play two pair. |
+| Common | Harmony | +2 mult for each match in the hand. |
+| Common | Contrast | +15 points for each difference in the hand. |
+| Common | Small Talk | +4 mult if you play 2 or fewer cards. |
+| Common | Fresh Start | +30 points on the first hand of each fight. |
+| Common | Late Bloomer | +8 mult on your last hand of a fight. |
+| Common | Kindling | +3 mult for each discard used this fight. |
+| Common | Clean Sweep | +$3 when you win a fight without discarding. |
+| Common | Dumpster Diver | +$1 each time you discard 4 cards at once. |
+| Common | Allowance | +$2 at cash out. |
+| Common | Skipper | +$5 when you skip a prize without taking anything. |
+| Common | Big Game | +$2 when you beat the higher-reward opponent. |
+| Common | Charm Bracelet | +3 mult for each charm you are holding. |
+| Common | Polish | Mult cards give +3 more mult and Bonus cards +20 more points. |
+| Common | Misprint | +0 to +10 mult, rolled each hand. |
 | Common | Workout | Every played card that scores permanently gains +2 points. |
 | Common | Lowball | Each 1 played gives +3 mult. |
 | Common | Number Line | +20 points if the played numbers are in a row, like 2-3-4 (3 or more cards, no repeats). |
@@ -281,6 +309,15 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Common | Tip Jar | Earn $1 for each unused discard when you win a fight. |
 | Common | Underdog | +$4 when you beat the lower-reward opponent. |
 | Common | Speedrun | +$3 when you win a fight with your first hand. |
+| Uncommon | Extra Seat | +1 card on the board. |
+| Uncommon | Giant Slayer | ×1.5 mult in boss fights. |
+| Uncommon | Greedy | +1 mult for every $5 you have. |
+| Uncommon | Loophole | On your last hand of a fight, boss card bans don't apply. |
+| Uncommon | Double Dip | Each charm you use has a 1 in 2 chance to stay for one more use (a kept charm can't stay again). |
+| Uncommon | Point Set | +40 points when you play any set. |
+| Uncommon | Prize Hunter | Prizes show 1 more option. |
+| Uncommon | Wallflower | +1 mult for each card left on the board when you play. |
+| Uncommon | Wild Fan | Each played card with a wild attribute gives +10 points. |
 | Uncommon | Mentor | The first card of each hand permanently gains +2 mult (if it scores). |
 | Uncommon | Apprentice | 1 in 4 chance to create a random charm when you play a set of 4 (needs a free charm slot). |
 | Uncommon | Collector | +1 mult for each set of 4 played this run. |
@@ -299,6 +336,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Uncommon | Twin Peaks | +8 mult if the hand is a pair or contains one (two pair, three/four/five of a kind, full house). |
 | Uncommon | Wild Child | +3 mult for each wild attribute among the played cards. |
 | Uncommon | Second Look | One free prize reroll each fight. |
+| Rare | Fibonacci | ×mult by the number of cards played: ×1, ×1, ×2, ×3, ×5 for 1 to 5 cards. |
 | Rare | Blur | Shading is ignored for sets and of-a-kind hands. |
 | Rare | Colorblind | Red and green are interchangeable, and so are blue and black: each card can count as either color of its pair. |
 | Rare | Shape Shifter | Hearts and diamonds are interchangeable, and so are spades and clubs. |

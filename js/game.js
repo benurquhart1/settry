@@ -65,6 +65,7 @@ const Game = {
       name: names[i],
       boss,
       lower: !boss && i === 0,                // the lower-reward opponent (for Underdog)
+      higher: !boss && i === 1,               // the higher-reward one (for Big Game)
       reward: k.reward,
       prize: boss ? null : prizes[i],
       shopModifier: boss ? prizes[i] : null,
@@ -86,9 +87,12 @@ const Game = {
     return Game.state.fight;
   },
 
-  // Does this card score in the current fight? (Boss "ban" modifiers stop some cards.)
+  // Does this card score in the current fight? (Boss "ban" modifiers stop some cards,
+  // except on your last hand with Loophole.)
   scores(card) {
-    const d = Game.state.fight?.modifier?.debuff;
+    const s = Game.state;
+    const d = s.fight?.modifier?.debuff;
+    if (d && s.playsLeft === 1 && Jokers.has(s.jokers, "lastHandUnban").length) return true;
     return !d || card[d.attribute] !== d.value;
   },
 
@@ -136,7 +140,8 @@ const Game = {
       { label: `${s.playsLeft} unused hand${s.playsLeft === 1 ? "" : "s"}`, amount: s.playsLeft * cfg.moneyPerHandLeft },
     ].filter((l) => l.amount > 0);
     let money = s.money + lines.reduce((t, l) => t + l.amount, 0);
-    const counts = { discardsLeft: s.discardsLeft, when: { lowerReward: !!s.fight.lower, firstHandWin: s.handsThisFight === 1 } };
+    const counts = { discardsLeft: s.discardsLeft, when: { lowerReward: !!s.fight.lower, higherReward: !!s.fight.higher,
+      firstHandWin: s.handsThisFight === 1, noDiscards: s.discardsLeft === Jokers.setting("discards", s.jokers) } };
     for (const j of Jokers.effects(s.jokers)) {
       const e = j.effect;
       let amount = 0;
@@ -247,7 +252,8 @@ const Game = {
   scoreContext() {
     const s = Game.state;
     return { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards(), scores: Game.scores,
-      rules: Game.rules(), pile: s.pile.length, firstHand: s.handsThisFight === 0, lastHand: s.playsLeft === 1, stats: s.stats };
+      rules: Game.rules(), pile: s.pile.length, firstHand: s.handsThisFight === 0, lastHand: s.playsLeft === 1, stats: s.stats,
+      discardsUsed: Jokers.setting("discards", s.jokers) - s.discardsLeft, money: s.money, charms: s.consumables.length, boss: s.fight.boss };
   },
 
   // How the held jokers bend the rules (see Jokers.rules).
@@ -344,6 +350,11 @@ const Game = {
     s.stats.cardsDiscarded += s.selected.length;
     s.stats.veteran = Math.round((s.stats.veteran + 0.1) * 10) / 10;
     s.message = `Discarded ${s.selected.length}.`;
+    for (const j of Jokers.has(s.jokers, "discardMoney")) {
+      if (s.selected.length !== j.effect.size) continue;
+      s.money += j.effect.money;
+      s.message += ` ${j.name}: +$${j.effect.money}.`;
+    }
     let removed = [];
     if (!s.firstDiscardDone && s.selected.length === 1) {
       const card = s.board[s.selected[0]];

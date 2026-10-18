@@ -73,15 +73,17 @@ const Shop = {
   // "shop" back to the shop, "fight" on to choosing the next fight, "start" to the first fight.
   openPack(p, after) {
     const s = Game.state;
-    s.pack = { ...p, options: Shop.packOptions(p), picksLeft: p.picks, after,
+    // Prizes show more options with Prize Hunter.
+    const size = p.options + (after === "fight" ? Jokers.total(s.jokers, "prizeOptions") : 0);
+    s.pack = { ...p, size, options: Shop.packOptions(p, size), picksLeft: p.picks, after,
       freeRerolls: after === "fight" ? Jokers.total(s.jokers, "freePrizeReroll") : 0 };
     s.phase = "pack";
   },
 
-  packOptions(p) {
+  packOptions(p, size) {
     const s = Game.state;
     const options = [];
-    for (let n = 0; n < p.options; n++) {
+    for (let n = 0; n < size; n++) {
       if (p.kind === "card") options.push({ card: Shop.packCard(p), taken: false });
       else if (p.kind === "charm") {
         const c = Consumables.roll(s.rng.pack, options.map((o) => o.charm));
@@ -108,7 +110,7 @@ const Shop = {
     if (cost === null || !Game.canSpend(cost)) return;
     if (cost) s.money -= cost;
     else s.pack.freeRerolls--;
-    s.pack.options = Shop.packOptions(s.pack);
+    s.pack.options = Shop.packOptions(s.pack, s.pack.size);
   },
 
   // A random card for a pack. Numbers 1 to 4 like starting decks; with deckLimited, only cards
@@ -152,6 +154,9 @@ const Shop = {
   closePack() {
     const s = Game.state;
     const after = s.pack?.after;
+    // Skipping a prize without taking anything pays Skipper jokers.
+    if (after === "fight" && s.pack.picksLeft === s.pack.picks)
+      for (const j of Jokers.has(s.jokers, "skipMoney")) s.money += j.effect.amount;
     s.pack = null;
     if (after === "fight") Game.nextFight();
     else if (after === "start") s.phase = "choose";   // the first fight's opponents are already rolled
