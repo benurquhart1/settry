@@ -6,21 +6,34 @@ When a rule changes, update this file and the data file together.
 
 ## The cards
 
-Each card has four attributes, each with three values:
+Each card has four attributes, each with four values:
 
 | Attribute | Values |
 |-----------|--------|
-| Count | 1, 2, 3 |
-| Shape | oval, diamond, squiggle |
-| Shading | solid, shaded (striped), empty |
-| Color | red, green, blue |
+| Count | 1, 2, 3, 4 |
+| Shape | heart, diamond, spade, club |
+| Shading | empty, solid, striped, checkered |
+| Color | red, green, blue, black |
 
-Every combination is one card, so the full deck is 3 × 3 × 3 × 3 = 81 cards.
+Every combination is one card, so the full deck is 4 × 4 × 4 × 4 = 256 cards. Open `gallery.html` to see them all.
 
 ## What counts as a set
 
-Three cards form a set when, for each of the four attributes, the three cards are either all the same or all different.
-For example, one red solid oval, two red shaded ovals and three red empty ovals is a set (count differs, shape same, shading differs, color same).
+A set is **4 cards**. For each of the four attributes, the 4 cards must be one of:
+
+- all the same (4 red),
+- all different (red, green, blue, black), or
+- two pairs (2 red and 2 blue).
+
+Anything else (3 of one value and 1 of another, or a pair plus two singles) breaks the set.
+For example: 1 red solid heart, 2 red solid spades, 3 blue solid hearts and 4 blue solid spades is a set (count all different, shape two pairs, shading all same, color two pairs).
+
+Any 3 cards have exactly one 4th card that completes them, just like any 2 cards in classic Set have exactly one 3rd.
+
+Why this rule (2026-10-18): with only "all same or all different", a 12-card board had a 4-card set just 6% of the time.
+With two pairs allowed, a random 12-card board has a set about 91% of the time and holds about 2 on average, close to classic Set (about 97% and 2.8).
+Keeping 3-card sets instead would make them far too easy (about 8 per 12-card board).
+`setSize` and `allowPairs` in `data/config.js` switch between these rules.
 
 ## A run (current version)
 
@@ -28,13 +41,14 @@ For example, one red solid oval, two red shaded ovals and three red empty ovals 
 |---------|-------|------------|
 | Run deck | 30 cards drawn at random from the 81 | `runDeckSize` |
 | Board | 12 cards face up | `boardSize` |
+| Set size | 4 cards, pairs allowed | `setSize`, `allowPairs` |
 | Goal | make 4 sets | `setsToWin` |
 | Discards | 2 per round | `discards` |
 | Discard size | up to 4 cards each | `maxDiscardSize` |
 
-1. Shuffle the 81 cards and take 30. That is your deck for the run.
+1. Shuffle the 256 cards and take 30. That is your deck for the run.
 2. Deal 12 face up.
-3. Select 3 cards and press **Play set**. If they form a set, it counts and the 3 cards are replaced from the deck. If not, nothing happens.
+3. Select 4 cards and press **Play set**. If they form a set, it counts and the 4 cards are replaced from the deck. If not, nothing happens.
 4. Or select 1 to 4 cards and press **Discard** to swap them for new cards from the deck. You have 2 discards.
 5. Make 4 sets to win. You lose when the board has no set and you have no discards left (or the deck is empty).
 
@@ -46,6 +60,7 @@ Jokers come in four rarities: **common, uncommon, rare, legendary**. None are de
 
 ## Open questions
 
+- With 4 sets of 4 cards to make, a 30-card deck leaves little room for discards. Is 30 still right?
 - Should a wrong set cost anything (a discard, points, a life)?
 - Scoring: is a round only win/lose, or do sets score points like Balatro hands?
 - What happens between rounds (shop, adding/removing cards from the run deck)?

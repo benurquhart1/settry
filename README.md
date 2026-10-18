@@ -4,7 +4,7 @@ A card game that mixes Set with Balatro. Plays in the browser, locally, with no 
 
 ## Play
 
-Open `index.html` in a browser. That's it.
+Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 (If your browser blocks local files, run `python3 -m http.server` in this folder and open http://localhost:8000.)
 
 ## Where things live
@@ -12,6 +12,8 @@ Open `index.html` in a browser. That's it.
 - `docs/RULES.md`: the rules, in words. Start here.
 - `data/config.js`: the numbers (deck size, board size, sets to win, discards).
 - `data/jokers.js`: jokers by rarity.
-- `js/deck.js`: building the 81 cards and checking sets.
+- `gallery.html`: every card in the deck.
+- `js/deck.js`: building the deck and checking sets.
+- `js/cards.js`: how a card is drawn.
 - `js/game.js`: round state and rules.
 - `js/ui.js`, `index.html`, `style.css`: the plain look.

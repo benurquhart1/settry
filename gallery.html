@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settry cards</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>All cards</h1>
+  <p id="info"></p>
+  <div id="gallery"></div>
+  <script src="data/config.js"></script>
+  <script src="js/deck.js"></script>
+  <script src="js/cards.js"></script>
+  <script>
+    const cards = Deck.full();
+    document.getElementById("info").textContent = `${cards.length} cards. Each row is one count and shape, in every shading and color.`;
+    document.getElementById("gallery").innerHTML = cards
+      .map((c) => `<div class="card" title="${c.id}">${cardSvg(c)}</div>`).join("");
+  </script>
+</body>
+</html>

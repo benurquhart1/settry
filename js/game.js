@@ -22,12 +22,12 @@ const Game = {
     if (s.over) return;
     const at = s.selected.indexOf(i);
     if (at >= 0) s.selected.splice(at, 1);
-    else if (s.selected.length < Math.max(3, window.SETTRY_CONFIG.maxDiscardSize)) s.selected.push(i);
+    else if (s.selected.length < Math.max(window.SETTRY_CONFIG.setSize, window.SETTRY_CONFIG.maxDiscardSize)) s.selected.push(i);
     s.message = "";
   },
 
   canPlay() {
-    return !Game.state.over && Game.state.selected.length === 3;
+    return !Game.state.over && Game.state.selected.length === window.SETTRY_CONFIG.setSize;
   },
 
   canDiscard() {
@@ -39,8 +39,7 @@ const Game = {
   playSet() {
     const s = Game.state;
     if (!Game.canPlay()) return;
-    const [a, b, c] = s.selected.map((i) => s.board[i]);
-    if (!Deck.isSet(a, b, c)) {
+    if (!Deck.isSet(s.selected.map((i) => s.board[i]))) {
       s.message = "Not a set.";
       s.selected = [];
       return;

@@ -24,20 +24,31 @@ const Deck = {
     return Deck.shuffle(Deck.full()).slice(0, size);
   },
 
-  // A set: for each attribute, all three cards match or all three differ.
-  isSet(a, b, c) {
+  // A set: for each attribute the cards are all the same, all different,
+  // or (with allowPairs) split into equal pairs such as A A B B.
+  isSet(cards) {
+    const cfg = window.SETTRY_CONFIG;
+    if (cards.length !== cfg.setSize) return false;
     return Object.keys(window.SETTRY_ATTRIBUTES).every((k) => {
-      const n = new Set([a[k], b[k], c[k]]).size;
-      return n === 1 || n === 3;
+      const tally = {};
+      for (const c of cards) tally[c[k]] = (tally[c[k]] || 0) + 1;
+      const n = Object.keys(tally).length;
+      if (n === 1 || n === cards.length) return true;
+      return cfg.allowPairs && Object.values(tally).every((v) => v === 2);
     });
   },
 
   findSets(cards) {
+    const size = window.SETTRY_CONFIG.setSize;
     const found = [];
-    for (let i = 0; i < cards.length; i++)
-      for (let j = i + 1; j < cards.length; j++)
-        for (let k = j + 1; k < cards.length; k++)
-          if (Deck.isSet(cards[i], cards[j], cards[k])) found.push([i, j, k]);
+    const pick = (start, chosen) => {
+      if (chosen.length === size) {
+        if (Deck.isSet(chosen.map((i) => cards[i]))) found.push(chosen);
+        return;
+      }
+      for (let i = start; i < cards.length; i++) pick(i + 1, [...chosen, i]);
+    };
+    pick(0, []);
     return found;
   },
 };

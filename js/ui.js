@@ -1,22 +1,4 @@
-// Plain rendering. Reads Game.state and draws it.
-const COLORS = { red: "#d22", green: "#1a1", blue: "#22c" };
-
-const SHAPES = {
-  oval: '<rect x="2" y="2" width="56" height="20" rx="10"/>',
-  diamond: '<polygon points="2,12 30,2 58,12 30,22"/>',
-  squiggle: '<path d="M4,17 C4,6 16,2 26,7 C34,11 42,3 52,3 C58,3 58,10 55,14 C50,22 38,20 31,16 C23,12 14,23 8,21 C5,20 4,19 4,17 Z"/>',
-};
-
-function cardSvg(card) {
-  const col = COLORS[card.color];
-  const fill = card.shading === "solid" ? col : card.shading === "shaded" ? `url(#stripe-${card.color})` : "none";
-  const symbols = [];
-  const top = 50 - card.count * 15;
-  for (let n = 0; n < card.count; n++)
-    symbols.push(`<g transform="translate(10 ${top + n * 30 + 3})" fill="${fill}" stroke="${col}" stroke-width="2">${SHAPES[card.shape]}</g>`);
-  return `<svg viewBox="0 0 80 100">${symbols.join("")}</svg>`;
-}
-
+// Plain rendering. Reads Game.state and draws it. Card drawing is in js/cards.js.
 function render() {
   const s = Game.state;
   const cfg = window.SETTRY_CONFIG;
