@@ -7,3 +7,4 @@ body { font-family: system-ui, sans-serif; background: #f4f4f4; color: #111; mar
 #msg { min-height: 1.2em; font-weight: bold; }
 .gallery { display: grid; grid-template-columns: repeat(16, 60px); gap: 4px; }
 .gallery .card { width: 60px; height: 75px; padding: 2px; cursor: default; }
+#wild { grid-template-columns: repeat(8, 60px); }

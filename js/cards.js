@@ -14,11 +14,32 @@ const LAYOUTS = {
   4: [[11, 20], [43, 20], [11, 54], [43, 54]],
 };
 
-// Stripe and checker fills for every color, added to the page once.
+// Wild number: symbols evenly spaced on a circle.
+function circleLayout(n) {
+  const size = 24 * 0.75;
+  return Array.from({ length: n }, (_, i) => {
+    const a = -Math.PI / 2 + (2 * Math.PI * i) / n;
+    return [40 + 25 * Math.cos(a) - size / 2, 50 + 25 * Math.sin(a) - size / 2, 0.75];
+  });
+}
+
+function wildDraw(card, attribute) {
+  const mod = (card.mods || []).map((m) => window.SETTRY_MODIFIERS[m]).find((m) => m?.wild === attribute);
+  return mod && mod.draw;
+}
+
+// Shared SVG defs: shading masks, the rainbow and the suit quarters. Added to the page once.
 function addPatterns() {
-  const defs = Object.entries(window.SETTRY_COLORS).map(([name, hex]) => `
-    <pattern id="striped-${name}" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1.6" height="4" fill="${hex}"/></pattern>
-    <pattern id="checkered-${name}" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="${hex}"/><rect x="3" y="3" width="3" height="3" fill="${hex}"/></pattern>`);
+  const defs = [
+    `<pattern id="p-striped" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1.6" height="4" fill="#fff"/></pattern>`,
+    `<pattern id="p-checkered" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="#fff"/><rect x="3" y="3" width="3" height="3" fill="#fff"/></pattern>`,
+    `<pattern id="p-dots" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1.4" fill="#fff"/></pattern>`,
+  ];
+  for (const p of ["striped", "checkered", "dots"])
+    defs.push(`<mask id="m-${p}"><rect x="-50" y="-50" width="200" height="200" fill="url(#p-${p})"/></mask>`);
+  const rainbow = window.SETTRY_MODIFIERS.wildColor.draw.rainbow;
+  defs.push(`<linearGradient id="rainbow" gradientUnits="userSpaceOnUse" x1="22" y1="30" x2="58" y2="70">${rainbow
+    .map((c, i) => `<stop offset="${i / (rainbow.length - 1)}" stop-color="${c}"/>`).join("")}</linearGradient>`);
   // Quarters of the 24x24 symbol box, for shapes stitched together from several suits.
   const quarters = { topLeft: [0, 0], topRight: [12, 0], bottomLeft: [0, 12], bottomRight: [12, 12] };
   for (const [q, [x, y]] of Object.entries(quarters))
@@ -29,17 +50,33 @@ function addPatterns() {
 
 // The shape markup for a card: its own suit, or a stitched shape when its suit is wild.
 function shapeSvg(card) {
-  const wild = (card.mods || []).map((m) => window.SETTRY_MODIFIERS[m]).find((m) => m?.wild === "shape");
+  const wild = wildDraw(card, "shape");
   if (!wild) return SHAPES[card.shape];
-  return Object.entries(wild.draw).map(([q, suit]) => `<g clip-path="url(#q-${q})">${SHAPES[suit]}</g>`).join("");
+  return Object.entries(wild).map(([q, suit]) => `<g clip-path="url(#q-${q})">${SHAPES[suit]}</g>`).join("");
 }
 
+let maskId = 0;
+
 function cardSvg(card) {
-  const col = window.SETTRY_COLORS[card.color];
-  const fill = card.shading === "solid" ? col : card.shading === "empty" ? "none" : `url(#${card.shading}-${card.color})`;
-  const symbols = LAYOUTS[card.count].map(([x, y, scale = 1]) =>
-    `<g transform="translate(${x} ${y}) scale(${scale})" fill="${fill}" stroke="${col}" stroke-width="${1.5 / scale}" stroke-linejoin="round">${shapeSvg(card)}</g>`);
-  return `<svg viewBox="0 0 80 100">${symbols.join("")}</svg>`;
+  const rainbow = wildDraw(card, "color");
+  // A wild color card draws its symbols in white as a mask over one card-wide rainbow.
+  const paint = rainbow ? "#fff" : window.SETTRY_COLORS[card.color];
+  const wildShading = wildDraw(card, "shading");
+  const shading = wildShading ? wildShading.pattern : card.shading;
+  const wildCount = wildDraw(card, "count");
+  const layout = wildCount ? circleLayout(wildCount.symbols) : LAYOUTS[card.count];
+  const shape = shapeSvg(card);
+  // Fill first (patterned shadings are the paint seen through a mask), then the outline.
+  const fill = shading === "empty" ? "" : shading === "solid"
+    ? `<g fill="${paint}">${shape}</g>`
+    : `<g fill="${paint}" mask="url(#m-${shading})">${shape}</g>`;
+  const symbols = layout.map(([x, y, scale = 1]) =>
+    `<g transform="translate(${x} ${y}) scale(${scale})">${fill}` +
+    `<g fill="none" stroke="${paint}" stroke-width="${1.5 / scale}" stroke-linejoin="round">${shape}</g></g>`);
+  if (!rainbow) return `<svg viewBox="0 0 80 100">${symbols.join("")}</svg>`;
+  const id = `rainbow-mask-${maskId++}`;
+  return `<svg viewBox="0 0 80 100"><mask id="${id}">${symbols.join("")}</mask>` +
+    `<rect width="80" height="100" fill="url(#rainbow)" mask="url(#${id})"/></svg>`;
 }
 
 addPatterns();

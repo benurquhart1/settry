@@ -48,13 +48,16 @@ Still to decide: how a set scores, the targets per ante, what rewards and the sh
 
 ## Card modifications
 
-Modifications live in `data/modifiers.js`. A card lists the ones it has in `card.mods`.
+Modifications live in `data/modifiers.js`. A card lists the ones it has in `card.mods`, and a card can have more than one.
 
 | Modification | Effect | Looks like |
 |--------------|--------|------------|
 | Wild suit | Counts as any shape when checking a set. | One shape stitched from a quarter of each suit: heart top left, club top right, spade bottom left, diamond bottom right. |
+| Wild number | Counts as any number. | 5 symbols in a circle. |
+| Wild color | Counts as any color. | Rainbow running diagonally across the card, red at top left to violet at bottom right. |
+| Wild shading | Counts as any shading. | Polka dots inside the shapes. |
 
-How a card gets a modification (shop, reward, joker) is still to decide. `gallery.html` shows the wild suit in every count, shading and color.
+How a card gets a modification (shop, reward, joker) is still to decide. `gallery.html` shows examples of each, and of cards with several.
 
 ## The round (current version)
 

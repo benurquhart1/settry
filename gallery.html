@@ -10,7 +10,8 @@
   <h1>All cards</h1>
   <p id="info"></p>
   <div id="gallery" class="gallery"></div>
-  <h2>Wild suit</h2>
+  <h2>Wild cards</h2>
+  <p>Rows: wild suit, wild number, wild color, wild shading, then cards with two or more wilds.</p>
   <div id="wild" class="gallery"></div>
   <script src="data/config.js"></script>
   <script src="data/modifiers.js"></script>
@@ -21,11 +22,13 @@
     document.getElementById("info").textContent = `${cards.length} cards. Each row is one count and shape, in every shading and color.`;
     document.getElementById("gallery").innerHTML = cards
       .map((c) => `<div class="card" title="${c.id}">${cardSvg(c)}</div>`).join("");
-    // One wild suit card per count, shading and color (shape doesn't matter once it's wild).
-    document.getElementById("wild").innerHTML = cards
-      .filter((c) => c.shape === "heart")
-      .map((c) => ({ ...c, mods: ["wildSuit"] }))
-      .map((c) => `<div class="card" title="${c.id} wild suit">${cardSvg(c)}</div>`).join("");
+    // A sample of each wild modification on assorted cards.
+    const sample = (i) => cards[(i * 37 + 11) % cards.length];
+    const rows = [["wildSuit"], ["wildCount"], ["wildColor"], ["wildShading"],
+      ["wildSuit", "wildColor"], ["wildCount", "wildShading"], ["wildSuit", "wildCount", "wildColor", "wildShading"]];
+    document.getElementById("wild").innerHTML = rows.flatMap((mods, r) =>
+      Array.from({ length: 8 }, (_, i) => ({ ...sample(r * 8 + i), mods })))
+      .map((c) => `<div class="card" title="${c.id} ${c.mods.join(" ")}">${cardSvg(c)}</div>`).join("");
   </script>
 </body>
 </html>
