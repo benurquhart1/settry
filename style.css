@@ -25,7 +25,7 @@ button.card { cursor: pointer; }
 
 /* Round */
 .table { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
-#board { display: grid; grid-template-columns: repeat(4, minmax(0, 90px)); gap: 8px; }
+#board { display: grid; grid-template-columns: repeat(5, minmax(0, 90px)); gap: 8px; }
 #board .card, #picked .card { width: 100%; height: auto; aspect-ratio: 90 / 112; }
 .play-area { display: grid; gap: 12px; width: min(384px, 100%); }
 #picked { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding-bottom: 12px; border-bottom: 2px solid #ccc; }

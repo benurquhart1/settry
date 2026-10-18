@@ -15,7 +15,7 @@ window.SETTRY_CONFIG = {
   ignoreUnlocks: true, // until saves exist, every joker with an effect can show up in shops and packs
 
   // Round
-  boardSize: 12,       // cards dealt face up (4 across, 3 down); ben trying 12 instead of 16
+  boardSize: 10,       // cards dealt face up (5 across, 2 down); ben, 2026-10-18 (was 12, then 16 before that)
   minPlay: 1,          // fewest cards one play can use (1 = high card)
   maxPlay: 4,          // most cards one play can use (the Fifth Card joker raises it to 5)
   plays: 4,            // hands per round

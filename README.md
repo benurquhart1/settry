@@ -31,4 +31,4 @@ Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 
 ## Balancing bot
 
-`node tools/bot.js --runs 500 --force-each --out runs.csv` plays runs headless with a rule-based bot (10-card board by default, `--board 12` for the current game), forcing each joker in turn on the same seeds. `python3 tools/analyze.py runs.csv` ranks the jokers against the no-joker baseline. Each run takes about 0.2 s, so `--force-each` at 500 runs is roughly 2 hours.
+`node tools/bot.js --runs 500 --force-each --out runs.csv` plays runs headless with a rule-based bot (10-card board, like the game; `--board N` to try another size), forcing each joker in turn on the same seeds. `python3 tools/analyze.py runs.csv` ranks the jokers against the no-joker baseline. Each run takes about 0.2 s, so `--force-each` at 500 runs is roughly 2 hours.

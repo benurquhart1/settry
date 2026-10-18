@@ -222,7 +222,7 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 | Hands | 4 per round | `plays` |
 | Discards | 2 per round, up to 4 cards each | `discards`, `maxDiscardSize` |
 
-1. Your deck is shuffled (by the seed) into a draw pile, and 12 cards are dealt face up.
+1. Your deck is shuffled (by the seed) into a draw pile, and 10 cards are dealt face up (ben, 2026-10-18).
 2. Select 1 to 4 cards (5 with Fifth Card). If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
 3. Or select 1 to 4 cards and press **Discard** to swap them.
 4. Played and discarded cards are replaced from the draw pile. When the pile is empty, their spots stay empty.

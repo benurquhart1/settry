@@ -11,5 +11,5 @@ Things ben asked to come back to later.
 - [ ] **Scaling**: fight targets and rewards are placeholders (ben will work on it), including endless mode.
 - [ ] **More boss modifiers**: ben will think of more.
 - [ ] **Polka dot deck**: ben listed a polka dot deck; the 4th shading is checkered (polka dots mark wild shading), so it's a Checkered deck for now.
-- [ ] **12-card board** (ben, 2026-10-18): trying 12 instead of 16; see how it plays (`boardSize`).
+- [ ] **10-card board** (ben, 2026-10-18): switched from 12; see how it plays (`boardSize`).
 - [ ] **Charms in the shop**: for now charms only come from Charm packs; Balatro also sells tarots singly.
