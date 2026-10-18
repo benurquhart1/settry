@@ -3,6 +3,7 @@ const SHAPES = {
   heart: '<path d="M12 21C12 21 2 14.5 2 8.2 2 4.8 4.6 2.5 7.5 2.5 9.6 2.5 11.1 3.7 12 5.4 12.9 3.7 14.4 2.5 16.5 2.5 19.4 2.5 22 4.8 22 8.2 22 14.5 12 21 12 21Z"/>',
   diamond: '<path d="M12 1.5 20.5 12 12 22.5 3.5 12Z"/>',
   spade: '<path d="M12 2C12 2 2.5 9.5 2.5 14.5 2.5 17.3 4.6 19.2 7.1 19.2 8.8 19.2 10.2 18.4 11 17.2L9.8 22H14.2L13 17.2C13.8 18.4 15.2 19.2 16.9 19.2 19.4 19.2 21.5 17.3 21.5 14.5 21.5 9.5 12 2 12 2Z"/>',
+  circle: '<circle cx="12" cy="12" r="10"/>',
   club: '<path d="M12 2.2A4.6 4.6 0 0 1 15.6 9.7 4.6 4.6 0 1 1 13.3 17.4L14.4 22H9.6L10.7 17.4A4.6 4.6 0 1 1 8.4 9.7 4.6 4.6 0 0 1 12 2.2Z"/>',
 };
 
@@ -28,7 +29,7 @@ function wildDraw(card, attribute) {
   return mod && mod.draw;
 }
 
-// Shared SVG defs: shading masks, the rainbow and the suit quarters. Added to the page once.
+// Shared SVG defs: shading masks and the rainbow. Added to the page once.
 function addPatterns() {
   const defs = [
     `<pattern id="p-striped" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1.6" height="4" fill="#fff"/></pattern>`,
@@ -40,19 +41,14 @@ function addPatterns() {
   const rainbow = window.SETTRY_MODIFIERS.wildColor.draw.rainbow;
   defs.push(`<linearGradient id="rainbow" gradientUnits="userSpaceOnUse" x1="22" y1="30" x2="58" y2="70">${rainbow
     .map((c, i) => `<stop offset="${i / (rainbow.length - 1)}" stop-color="${c}"/>`).join("")}</linearGradient>`);
-  // Quarters of the 24x24 symbol box, for shapes stitched together from several suits.
-  const quarters = { topLeft: [0, 0], topRight: [12, 0], bottomLeft: [0, 12], bottomRight: [12, 12] };
-  for (const [q, [x, y]] of Object.entries(quarters))
-    defs.push(`<clipPath id="q-${q}"><rect x="${x}" y="${y}" width="12" height="12"/></clipPath>`);
   document.body.insertAdjacentHTML("afterbegin",
     `<svg width="0" height="0" style="position:absolute"><defs>${defs.join("")}</defs></svg>`);
 }
 
-// The shape markup for a card: its own suit, or a stitched shape when its suit is wild.
+// The shape markup for a card: its own suit, or the wild shape.
 function shapeSvg(card) {
   const wild = wildDraw(card, "shape");
-  if (!wild) return SHAPES[card.shape];
-  return Object.entries(wild).map(([q, suit]) => `<g clip-path="url(#q-${q})">${SHAPES[suit]}</g>`).join("");
+  return SHAPES[wild ? wild.shape : card.shape];
 }
 
 let maskId = 0;

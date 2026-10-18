@@ -6,8 +6,7 @@ window.SETTRY_MODIFIERS = {
     name: "Wild suit",
     text: "Counts as any shape.",
     wild: "shape",
-    // One shape built from a quarter of each suit.
-    draw: { topLeft: "heart", topRight: "club", bottomLeft: "spade", bottomRight: "diamond" },
+    draw: { shape: "circle" },   // drawn as a circle instead of a suit
   },
   wildCount: {
     name: "Wild number",

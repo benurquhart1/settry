@@ -52,7 +52,7 @@ Modifications live in `data/modifiers.js`. A card lists the ones it has in `card
 
 | Modification | Effect | Looks like |
 |--------------|--------|------------|
-| Wild suit | Counts as any shape when checking a set. | One shape stitched from a quarter of each suit: heart top left, club top right, spade bottom left, diamond bottom right. |
+| Wild suit | Counts as any shape when checking a set. | A circle in place of the suit. |
 | Wild number | Counts as any number. | 5 symbols in a circle. |
 | Wild color | Counts as any color. | Rainbow running diagonally across the card, red at top left to violet at bottom right. |
 | Wild shading | Counts as any shading. | Polka dots inside the shapes. |
