@@ -2,10 +2,11 @@
 window.SETTRY_CONFIG = {
   boardSize: 16,       // cards dealt face up (a 4x4 grid)
   minPlay: 2,          // fewest cards one play can use
-  maxPlay: 5,          // most cards one play can use
+  maxPlay: 4,          // most cards one play can use (the Fifth Card joker raises it to 5)
   plays: 4,            // hands per round
   roundTarget: 150,    // score needed to beat the round (placeholder until antes exist)
   discards: 2,         // discards per round
+  jokerSlots: 5,       // most jokers you can hold
   maxDiscardSize: 4,   // most cards one discard can throw away
   allowPairs: false,   // let a set attribute also split into two pairs (A A B B); off per ben's set rule
 };

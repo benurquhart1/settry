@@ -3,6 +3,7 @@ const $ = (id) => document.getElementById(id);
 const decks = window.SETTRY_DECKS;
 let deckIndex = 0;
 let deckSort = "count";
+let pickedJokers = [];
 
 // Start menu ------------------------------------------------------------
 
@@ -14,17 +15,34 @@ function renderMenu() {
     <div class="sample">${sample.map((c) => `<div class="card">${cardSvg(c)}</div>`).join("")}</div>`;
 }
 
+function renderJokerPick() {
+  $("joker-pick").innerHTML = window.SETTRY_JOKERS.map((j) => {
+    const n = pickedJokers.indexOf(j.id);
+    return jokerHtml(j, n >= 0 ? "on" : "").replace('<div class="joker-art">', `${n >= 0 ? `<b class="order">${n + 1}</b>` : ""}<div class="joker-art">`);
+  }).join("");
+}
+
+$("joker-pick").addEventListener("click", (e) => {
+  const el = e.target.closest(".joker");
+  if (!el) return;
+  const id = el.dataset.joker;
+  if (pickedJokers.includes(id)) pickedJokers = pickedJokers.filter((x) => x !== id);
+  else if (pickedJokers.length < window.SETTRY_CONFIG.jokerSlots) pickedJokers.push(id);
+  renderJokerPick();
+});
+
 function showMenu() {
   $("menu").hidden = false;
   $("game").hidden = true;
   $("seed").value = Rng.newSeed();
   renderMenu();
+  renderJokerPick();
 }
 
 $("prev-deck").onclick = () => { deckIndex = (deckIndex + decks.length - 1) % decks.length; renderMenu(); };
 $("next-deck").onclick = () => { deckIndex = (deckIndex + 1) % decks.length; renderMenu(); };
 $("start").onclick = () => {
-  Game.start(decks[deckIndex], $("seed").value.trim() || Rng.newSeed());
+  Game.start(decks[deckIndex], $("seed").value.trim() || Rng.newSeed(), pickedJokers.slice());
   $("menu").hidden = true;
   $("game").hidden = false;
   render();
@@ -35,7 +53,7 @@ $("menu-btn").onclick = showMenu;
 
 let animating = false;
 
-// The hand box. `shown` overrides the points while a play is being scored.
+// The hand box. `shown` ({ points, mult, done }) overrides the numbers while a play is being scored.
 function handBox(hand, shown) {
   if (!hand) {
     const n = Game.state.selected.length;
@@ -44,10 +62,13 @@ function handBox(hand, shown) {
   }
   const base = window.SETTRY_HANDS[hand.id].points;
   const points = shown ? shown.points : hand.points;
+  const mult = shown ? shown.mult : hand.mult;
   const total = shown && !shown.done ? "" : ` = ${hand.total}`;
+  const jokers = hand.jokerSteps.map((st) => `<div>${Jokers.byId(st.joker).name}: ${st.label}</div>`).join("");
   return `<div class="hand-name">${hand.name}</div>
-    <div class="hand-steps">${base}${hand.steps.map((st) => ` + ${st.add}`).join("")}</div>
-    <div class="hand-score"><span class="pts">${points}</span> × <span class="mult">${hand.mult}</span>${total}</div>`;
+    <div class="hand-steps">${base}${hand.steps.map((st) => ` + ${st.add}`).join("")} points · ${hand.baseMult} mult</div>
+    ${jokers ? `<div class="joker-steps">${jokers}</div>` : ""}
+    <div class="hand-score"><span class="pts">${points}</span> × <span class="mult">${mult}</span>${total}</div>`;
 }
 
 function render() {
@@ -56,7 +77,8 @@ function render() {
   const hand = Game.selectedHand();
 
   // Top row: the selected cards in the order clicked, with the points each adds.
-  const slots = Array.from({ length: cfg.maxPlay }, (_, n) => {
+  $("jokers").innerHTML = s.jokers.map((id) => jokerHtml(Jokers.byId(id))).join("");
+  const slots = Array.from({ length: s.maxPlay }, (_, n) => {
     const i = s.selected[n];
     if (i === undefined) return `<div class="card empty"></div>`;
     const c = s.board[i];
@@ -71,7 +93,7 @@ function render() {
     .join("");
 
   $("hand-box").innerHTML = handBox(hand);
-  $("info").innerHTML = `Score <b>${s.score}</b> / ${cfg.roundTarget}<br>
+  $("info").innerHTML = `Score <b>${s.score}</b> / ${cfg.roundTarget} · $${s.money}<br>
     Hands left ${s.playsLeft} · Discards left ${s.discardsLeft}<br>
     Draw pile ${s.pile.length} · Seed ${s.seed}`;
   const over = s.over === "won" ? `You win with ${s.score}!` : s.over === "lost" ? `Out of hands at ${s.score}. You lose.` : "";
@@ -101,14 +123,22 @@ $("play").onclick = async () => {
   animating = true;
   render();
   const slots = $("picked").querySelectorAll(".card");
-  $("hand-box").innerHTML = handBox(hand, { points: window.SETTRY_HANDS[hand.id].points });
+  $("hand-box").innerHTML = handBox(hand, { points: window.SETTRY_HANDS[hand.id].points, mult: hand.baseMult });
   await wait(stepMs);
   for (const [n, st] of hand.steps.entries()) {
     slots[n].classList.add("scoring");
-    $("hand-box").innerHTML = handBox(hand, { points: st.points });
+    $("hand-box").innerHTML = handBox(hand, { points: st.points, mult: hand.baseMult });
     await wait(stepMs);
   }
-  $("hand-box").innerHTML = handBox(hand, { points: hand.points, done: true });
+  const jokerEls = $("jokers").querySelectorAll(".joker");
+  for (const st of hand.jokerSteps) {
+    const el = jokerEls[Game.state.jokers.indexOf(st.joker)];
+    el.classList.add("scoring");
+    el.dataset.label = st.label;
+    $("hand-box").innerHTML = handBox(hand, { points: hand.points, mult: st.mult });
+    await wait(stepMs);
+  }
+  $("hand-box").innerHTML = handBox(hand, { points: hand.points, mult: hand.mult, done: true });
   await wait(stepMs * 2);
   animating = false;
   Game.play();

@@ -35,7 +35,8 @@ button.card { cursor: pointer; }
 #picked .card.scoring .add { opacity: 1; }
 #board .card.picked { opacity: 0.3; }
 .hand-steps { color: #1565c0; font-size: 14px; margin-top: 4px; }
-aside { width: 260px; max-width: 100%; }
+aside { width: 440px; max-width: 100%; }
+#hand-box, .actions, #info { max-width: 280px; }
 #hand-box { border: 2px solid #333; border-radius: 8px; padding: 12px; background: #fff; text-align: center; }
 .hand-name { font-size: 20px; font-weight: bold; }
 .hand-score { font-size: 18px; margin-top: 6px; }
@@ -54,3 +55,21 @@ dialog { max-width: 90vw; }
 .gallery .card { width: 60px; height: 75px; padding: 2px; }
 #gallery { grid-template-columns: repeat(16, 60px); }
 #wild { grid-template-columns: repeat(8, 60px); }
+
+/* Jokers: art on the top half, name in the middle, text at the bottom */
+.joker-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.joker { position: relative; width: 120px; min-height: 170px; display: grid; grid-template-rows: 80px auto 1fr; border: 3px solid var(--rarity); border-radius: 10px; background: #fff; overflow: hidden; cursor: default; text-align: center; box-sizing: border-box; }
+.joker-art { display: grid; place-items: center; background: var(--rarity); color: #fff; font-size: 34px; font-weight: bold; }
+.joker-name { font-weight: bold; font-size: 13px; padding: 4px 4px 2px; }
+.joker-text { align-self: start; font-size: 11px; line-height: 1.25; margin: 0 6px 6px; padding: 4px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+#joker-pick .joker { cursor: pointer; opacity: 0.55; }
+#joker-pick .joker.on { opacity: 1; box-shadow: 0 0 0 3px #f90; }
+.joker .order { position: absolute; top: 4px; left: 6px; color: #fff; font-size: 14px; }
+.joker-row.small { justify-content: flex-start; margin-bottom: 10px; }
+.joker-row.small .joker { width: 82px; min-height: 118px; grid-template-rows: 46px auto 1fr; }
+.joker-row.small .joker-art { font-size: 22px; }
+.joker-row.small .joker-name { font-size: 11px; }
+.joker-row.small .joker-text { font-size: 9px; margin: 0 3px 3px; padding: 2px; }
+.joker.scoring { box-shadow: 0 0 0 3px #c62828; transform: translateY(-4px); }
+.joker.scoring::after { content: attr(data-label); position: absolute; top: 4px; right: 4px; background: #c62828; color: #fff; font-size: 11px; font-weight: bold; padding: 1px 4px; border-radius: 4px; }
+.joker-steps { color: #c62828; font-size: 13px; margin-top: 4px; }

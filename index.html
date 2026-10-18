@@ -16,8 +16,11 @@
       <button id="next-deck" aria-label="Next deck">▶</button>
     </div>
     <label class="seed">Seed <input id="seed" size="12" spellcheck="false"></label>
+    <h3>Test jokers</h3>
+    <p class="hint">Pick up to 5 to start with. They apply left to right in the order picked.</p>
+    <div id="joker-pick" class="joker-row"></div>
     <button id="start" class="big">Start game</button>
-    <p><a href="gallery.html">See all cards</a></p>
+    <p><a href="gallery.html">See all cards</a> · <a href="jokers.html">See all jokers</a></p>
   </section>
 
   <section id="game" hidden>
@@ -27,6 +30,7 @@
         <div id="board"></div>
       </div>
       <aside>
+        <div id="jokers" class="joker-row small"></div>
         <div id="hand-box"></div>
         <p id="info"></p>
         <p id="msg"></p>
@@ -62,6 +66,7 @@
   <script src="data/hands.js"></script>
   <script src="js/rng.js"></script>
   <script src="js/deck.js"></script>
+  <script src="js/jokers.js"></script>
   <script src="js/hands.js"></script>
   <script src="js/cards.js"></script>
   <script src="js/game.js"></script>

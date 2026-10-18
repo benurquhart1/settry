@@ -13,7 +13,8 @@ Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 - `data/config.js`: the numbers (deck size, board size, sets to win, discards).
 - `data/decks.js`: starting decks.
 - `data/hands.js`: hands you can play and what they score.
-- `data/jokers.js`: jokers by rarity.
+- `data/jokers.js`: jokers, rarities and drop rates. `jokers.html` shows them.
+- `js/jokers.js`: applying joker effects.
 - `data/modifiers.js`: card modifications such as the wild suit.
 - `gallery.html`: every card in the deck.
 - `js/deck.js`: building the deck and checking sets.

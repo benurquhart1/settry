@@ -3,8 +3,8 @@ const Game = {
   state: null,
 
   // Start a round with a deck from data/decks.js and a seed for every random choice.
-  start(deckDef, seed) {
-    const cfg = window.SETTRY_CONFIG;
+  start(deckDef, seed, jokers = []) {
+    const setting = (name) => Jokers.setting(name, jokers);
     const random = Rng.create(seed);
     const runDeck = Deck.runDeck(deckDef, random);
     const pile = runDeck.slice();
@@ -14,12 +14,16 @@ const Game = {
       random,                                 // use for anything random later (rewards, shop)
       runDeck,                                // every card in this run's deck
       pile,                                   // draw pile, top first
-      board: pile.splice(0, cfg.boardSize),   // face-up cards; empty spots are null
+      board: pile.splice(0, setting("boardSize")),   // face-up cards; empty spots are null
       selected: [],                           // indices into board
       used: new Set(),                        // uids of cards played or discarded
+      jokers,                                 // held joker ids, applied left to right
+      maxPlay: setting("maxPlay"),
+      timesPlayed: {},                        // hand id -> times played this game
+      money: 0,
       score: 0,
-      playsLeft: cfg.plays,
-      discardsLeft: cfg.discards,
+      playsLeft: setting("plays"),
+      discardsLeft: setting("discards"),
       message: "",
       over: null,                             // null, "won" or "lost"
     };
@@ -34,15 +38,17 @@ const Game = {
     if (s.over || !s.board[i]) return;
     const at = s.selected.indexOf(i);
     if (at >= 0) s.selected.splice(at, 1);
-    else if (s.selected.length < Math.max(window.SETTRY_CONFIG.maxPlay, window.SETTRY_CONFIG.maxDiscardSize)) s.selected.push(i);
+    else if (s.selected.length < Math.max(s.maxPlay, window.SETTRY_CONFIG.maxDiscardSize)) s.selected.push(i);
     s.message = "";
   },
 
   // The hand the selected cards make, or null.
   selectedHand() {
-    const cfg = window.SETTRY_CONFIG;
-    const n = Game.state.selected.length;
-    return n >= cfg.minPlay && n <= cfg.maxPlay ? Hands.best(Game.selectedCards()) : null;
+    const s = Game.state;
+    const n = s.selected.length;
+    return n >= window.SETTRY_CONFIG.minPlay && n <= s.maxPlay
+      ? Hands.best(Game.selectedCards(), { jokers: s.jokers, timesPlayed: s.timesPlayed })
+      : null;
   },
 
   canPlay() {
@@ -60,6 +66,8 @@ const Game = {
     if (!Game.canPlay()) return;
     const hand = Game.selectedHand();
     s.score += hand.total;
+    s.money += hand.money;
+    s.timesPlayed[hand.id] = (s.timesPlayed[hand.id] || 0) + 1;
     s.playsLeft--;
     s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}`;
     Game.replaceSelected();

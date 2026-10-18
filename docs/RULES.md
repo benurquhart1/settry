@@ -19,7 +19,7 @@ Every combination is one card, so the full deck is 4 × 4 × 4 × 4 = 256 cards.
 
 ## Hands
 
-Each play uses 2 to 5 cards from your hand. The play scores its best hand, Balatro-style:
+Each play uses 2 to 4 cards from the board (5 with the Fifth Card joker). The play scores its best hand, Balatro-style:
 
 1. Start with the hand's points and mult (table below).
 2. Each played card adds its own points, one at a time, **in the order you selected them**: a card adds its number (1 to 4), and a wild number adds 5.
@@ -97,13 +97,13 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 | Setting | Value | Config key |
 |---------|-------|------------|
 | Board | 16 cards in a 4x4 grid | `boardSize` |
-| Play size | 2 to 5 cards | `minPlay`, `maxPlay` |
+| Play size | 2 to 4 cards (5 with the Fifth Card joker) | `minPlay`, `maxPlay` |
 | Hands | 4 per round | `plays` |
 | Target | 150 points (placeholder) | `roundTarget` |
 | Discards | 2 per round, up to 4 cards each | `discards`, `maxDiscardSize` |
 
 1. Your deck is shuffled (by the seed) into a draw pile, and 16 cards are dealt face up.
-2. Select 2 to 5 cards. If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
+2. Select 2 to 4 cards (5 with Fifth Card). If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
 3. Or select 1 to 4 cards and press **Discard** to swap them.
 4. Played and discarded cards are replaced from the draw pile. When the pile is empty, their spots stay empty.
 5. Reach the target within 4 hands to win the round.
@@ -112,7 +112,34 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 
 ## Jokers
 
-Jokers come in four rarities: **common, uncommon, rare, legendary**. None are defined yet.
+Jokers live in `data/jokers.js` (effects are data; `js/jokers.js` applies them). `jokers.html` shows every joker card.
+A joker card has art on the top half, its name in the middle and a text box at the bottom. Names and art are placeholders.
+You can hold up to 5 (`jokerSlots`). Scoring jokers apply **left to right**, after the cards have added their points.
+For now you pick test jokers on the start menu; shops and drops come later.
+
+**Drop rates** (by rarity): common 60%, uncommon 25%, rare 12%, unique 3%. Legendary jokers never drop.
+Many jokers will need to be unlocked first (`unlocked` in the data; all are unlocked for now).
+
+**Words used on jokers**
+- A **difference** is, in a set, each attribute that is all different; in an of-a-kind hand, each group of identical cards (a pair has 1, two pair has 2).
+- A **match** is, in a set, each attribute that is all the same; in an of-a-kind hand, each card (a pair has 2, three of a kind has 3).
+
+| Rarity | Joker | Effect |
+|--------|-------|--------|
+| Common | Encore | +1 mult for each time this hand has been played this game (including this play). |
+| Common | Variety | +1 mult for each difference in the hand. |
+| Common | Overtime | +1 hand each round. |
+| Common | Recycler | +1 discard each round. |
+| Uncommon | Big Table | +2 cards on the board. |
+| Uncommon | Odd One Out | Earn $1 for each difference in the hand. |
+| Uncommon | Birds of a Feather | Earn $1 for each match in the hand. |
+| Rare | Kaleidoscope | Multiply mult by the number of differences in the hand. |
+| Rare | Mirror | Multiply mult by the number of matches in the hand. No matches scores 0. |
+| Rare | Fifth Card | Play up to 5 cards at a time (the normal limit is 4). |
+| Unique | (to come) | |
+| Legendary | (to come) | |
+
+Money ($) is tracked but has no use yet.
 
 ## Open questions
 

@@ -44,8 +44,9 @@ const Hands = {
   },
 
   // Scores a hand Balatro-style: start from the hand's points and mult, then each card,
-  // in the order given (the order clicked), adds its points. Total = points x mult.
-  score(cards, hand) {
+  // in the order given (the order clicked), adds its points, then each joker applies left to right.
+  // ctx: { jokers: [ids], timesPlayed: {handId: n} } for plays already made this game.
+  score(cards, hand, id, ctx = {}) {
     const steps = [];
     let points = hand.points;
     for (const card of cards) {
@@ -53,16 +54,18 @@ const Hands = {
       points += add;
       steps.push({ card, add, points });
     }
-    return { steps, points, mult: hand.mult, total: points * hand.mult };
+    const counts = Jokers.counts(cards, id, ((ctx.timesPlayed || {})[id] || 0) + 1);
+    const j = Jokers.apply(ctx.jokers || [], counts, hand.mult);
+    return { steps, jokerSteps: j.steps, points, baseMult: hand.mult, mult: j.mult, money: j.money, total: points * j.mult };
   },
 
   // The best-scoring hand made by all of the played cards together, or null.
   // Every played card has to be part of the hand: no extra cards.
-  best(cards) {
+  best(cards, ctx) {
     let best = null;
     for (const [id, hand] of Object.entries(window.SETTRY_HANDS)) {
       if (!Hands.checks[id]?.(cards)) continue;
-      const scored = Hands.score(cards, hand);
+      const scored = Hands.score(cards, hand, id, ctx);
       if (!best || scored.total > best.total) best = { id, ...hand, ...scored };
     }
     return best;

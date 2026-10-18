@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settry jokers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Jokers</h1>
+  <p><a href="index.html">Back to the game</a></p>
+  <div id="list"></div>
+  <h2>Words on the jokers</h2>
+  <dl id="glossary"></dl>
+  <script src="data/config.js"></script>
+  <script src="data/jokers.js"></script>
+  <script src="data/modifiers.js"></script>
+  <script src="js/cards.js"></script>
+  <script>
+    const R = window.SETTRY_JOKER_RARITIES;
+    document.getElementById("list").innerHTML = Object.entries(R).map(([id, r]) => {
+      const jokers = window.SETTRY_JOKERS.filter((j) => j.rarity === id);
+      const odds = r.weight ? `${r.weight}% of drops` : "never drops";
+      return `<h2>${r.name} <small>(${odds})</small></h2>
+        <div class="joker-row" style="justify-content:flex-start">${jokers.length ? jokers.map((j) => jokerHtml(j)).join("") : "<p class='hint'>None yet.</p>"}</div>`;
+    }).join("");
+    document.getElementById("glossary").innerHTML = Object.entries(window.SETTRY_JOKER_GLOSSARY)
+      .map(([w, d]) => `<dt><b>${w[0].toUpperCase() + w.slice(1)}</b></dt><dd>${d}</dd>`).join("");
+  </script>
+</body>
+</html>
