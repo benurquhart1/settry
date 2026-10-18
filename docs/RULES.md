@@ -264,7 +264,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Kaleidoscope | Multiply mult by the number of differences in the hand. |
 | Rare | Mirror | Multiply mult by the number of matches in the hand. No matches scores 0. |
 | Rare | Fifth Card | Play up to 5 cards at a time (the normal limit is 4). |
-| Rare | Copycat | If your first discard of the round is 1 card, add a copy of it to your deck. |
+| Rare | Copycat | If the first hand of a fight is a single card, add a copy of it to your deck (ben, 2026-10-18; replaced the discard version). |
 | Rare | Shredder | If your first discard of the round is 1 card, remove it from your deck. |
 | Rare | Full Spectrum | ×5 mult if the hand is a set with every attribute different. |
 | Rare | Elite Recruit | At the start of each fight, add a random card your starting deck could have, always with a wild or an enhancement. |
@@ -272,6 +272,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Gambler | At cash out: 80% chance your money ×1.3, 20% chance it drops to $0 (only when above $0). |
 | Rare | Loan Shark | You can go into debt (see Debt above). At cash out, pay 20% interest on your debt. |
 | Rare | High Five | Each 5 played gives +5 mult. |
+| Common | Workout | Every played card that scores permanently gains +2 points. |
 | Common | Lowball | Each 1 played gives +3 mult. |
 | Common | Number Line | +20 points if the played numbers are in a row, like 2-3-4 (3 or more cards, no repeats). |
 | Common | Snowball | +2 points for every hand played this run (including this one). |
@@ -280,6 +281,7 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Common | Tip Jar | Earn $1 for each unused discard when you win a fight. |
 | Common | Underdog | +$4 when you beat the lower-reward opponent. |
 | Common | Speedrun | +$3 when you win a fight with your first hand. |
+| Uncommon | Mentor | The first card of each hand permanently gains +2 mult (if it scores). |
 | Uncommon | Apprentice | 1 in 4 chance to create a random charm when you play a set of 4 (needs a free charm slot). |
 | Uncommon | Collector | +1 mult for each set of 4 played this run. |
 | Uncommon | Compost | +1 point for each card discarded this run. |

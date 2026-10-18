@@ -40,9 +40,9 @@ const Hands = {
     set4: (c, r) => c.length === 4 && Deck.isSet(c, r),
   },
 
-  // Points a card adds when it scores: its number, plus 30 for a Bonus card.
+  // Points a card adds when it scores: its number, plus 30 for a Bonus card, plus what it gained (Workout).
   cardPoints(card) {
-    return card.count + (window.SETTRY_ENHANCEMENTS[card.enh]?.points || 0);
+    return card.count + (window.SETTRY_ENHANCEMENTS[card.enh]?.points || 0) + (card.bonus || 0);
   },
 
   // Scores a hand Balatro-style: start from the hand's points and mult, then each card,
@@ -76,6 +76,7 @@ const Hands = {
         const e = enhs[card.enh] || {};
         const labels = t ? ["again"] : [];
         if (e.mult) { mult += e.mult; labels.push(`+${e.mult} mult`); }
+        if (card.bonusMult) { mult += card.bonusMult; labels.push(`+${card.bonusMult} mult (gained)`); }
         if (e.luckyMult) {
           if (!ctx.random) labels.push(`${luck} in ${e.luckyMult.odds}: +${e.luckyMult.mult} mult, ${luck} in ${e.luckyMoney.odds}: $${e.luckyMoney.money}`);
           else {

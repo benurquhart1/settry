@@ -8,8 +8,10 @@
 //              Chances are rolled with the game's seed, only when the hand is played.
 //   distinctNumbers  +`mult` for each different number among the played cards
 //   allDifferentSet  x `mult` when the hand is a set with every attribute different
-//   singleDiscard    on the round's first discard, if it is 1 card: "duplicate" adds a copy
-//                    of it to your deck, "remove" takes it out of your deck for good
+//   singleDiscard    on the round's first discard, if it is 1 card: "remove" takes it out of your deck for good
+//   firstHandSingle  if the fight's first hand is 1 card, "duplicate" adds a copy of it to your deck
+//   cardGrowth after a hand, the played cards (`which: "all"`) or the first one (`"first"`) that scored
+//              permanently gain `points` and/or `mult` (stored on the card as bonus / bonusMult)
 //   recycle    played and discarded cards go back into the draw pile
 //   interest   at cash out, +`rate` of your money (rounded down), at most `max` (null = no cap)
 //   moneyGamble  at cash out, with chance `chance` your money x `win`, otherwise x `lose`
@@ -76,6 +78,9 @@ window.SETTRY_JOKERS = [
   { id: "recycler", name: "Recycler", rarity: "common", art: "+D",
     text: "+1 discard each round.",
     effect: { type: "extra", setting: "discards", amount: 1 }, unlocked: true },
+  { id: "workout", name: "Workout", rarity: "common", art: "💪",
+    text: "Every played card permanently gains +2 points.",
+    effect: { type: "cardGrowth", which: "all", points: 2 }, unlocked: true },
   { id: "lowball", name: "Lowball", rarity: "common", art: "1+",
     text: "Each 1 played gives +3 mult.",
     effect: { type: "cardsWith", attribute: "count", value: 1, mult: 3 }, unlocked: true },
@@ -126,6 +131,9 @@ window.SETTRY_JOKERS = [
   { id: "dayTrader", name: "Day Trader", rarity: "uncommon", art: "📈",
     text: "At cash out: 50% chance your money ×1.25, 50% chance ×0.8.",
     effect: { type: "moneyGamble", chance: 0.5, win: 1.25, lose: 0.8 }, unlocked: true },
+  { id: "mentor", name: "Mentor", rarity: "uncommon", art: "🎓",
+    text: "The first card of each hand permanently gains +2 mult.",
+    effect: { type: "cardGrowth", which: "first", mult: 2 }, unlocked: true },
   { id: "apprentice", name: "Apprentice", rarity: "uncommon", art: "🔮",
     text: "1 in 4 chance to create a random charm when you play a set of 4 (needs a free charm slot).",
     effect: { type: "afterHand", when: "set4", chance: 0.25, give: "charm" }, unlocked: true },
@@ -198,8 +206,8 @@ window.SETTRY_JOKERS = [
     text: "Play up to 5 cards at a time.",
     effect: { type: "extra", setting: "maxPlay", amount: 1 }, unlocked: true },
   { id: "dna", name: "Copycat", rarity: "rare", art: "⧉",
-    text: "If your first discard of the round is 1 card, add a copy of it to your deck.",
-    effect: { type: "singleDiscard", action: "duplicate" }, unlocked: true },
+    text: "If the first hand of a fight is a single card, add a copy of it to your deck.",
+    effect: { type: "firstHandSingle", action: "duplicate" }, unlocked: true },
   { id: "shredder", name: "Shredder", rarity: "rare", art: "✂",
     text: "If your first discard of the round is 1 card, remove it from your deck.",
     effect: { type: "singleDiscard", action: "remove" }, unlocked: true },

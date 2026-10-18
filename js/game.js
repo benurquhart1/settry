@@ -300,6 +300,22 @@ const Game = {
     if (hand.id === "set4") s.stats.set4Played++;
     s.stats.veteran = Math.max(1, Math.round((s.stats.veteran - 1) * 10) / 10);
     s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}` + (hand.money ? ` · +$${hand.money}` : "");
+    // Cards that scored grow (Workout, Mentor); a lone first hand gets copied (Copycat).
+    const scored = hand.steps.filter((st) => st.add || Game.scores(st.card)).map((st) => st.card).filter((c, i, a) => a.indexOf(c) === i);
+    for (const { effect: e } of Jokers.has(s.jokers, "cardGrowth")) {
+      for (const card of e.which === "first" ? scored.slice(0, 1) : scored) {
+        if (e.points) card.bonus = (card.bonus || 0) + e.points;
+        if (e.mult) card.bonusMult = (card.bonusMult || 0) + e.mult;
+      }
+    }
+    if (s.handsThisFight === 1 && hand.steps.length && new Set(hand.steps.map((st) => st.card)).size === 1) {
+      for (const j of Jokers.has(s.jokers, "firstHandSingle")) {
+        const copy = { ...hand.steps[0].card, uid: s.nextUid++ };
+        s.runDeck.push(copy);
+        Game.shuffleIntoPile([copy]);
+        s.message += ` · ${j.name} added a copy to your deck`;
+      }
+    }
     // Chances after a hand (Grand Slam, Apprentice), rolled with the seed.
     for (const j of Jokers.has(s.jokers, "afterHand")) {
       const e = j.effect;
