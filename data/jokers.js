@@ -1,13 +1,20 @@
 // Jokers. Effects are data; js/jokers.js applies them. Names and art are placeholders until ben picks them.
 //
 // effect types:
-//   addMult   +N mult, N from `per`        mulMult  x N mult, N from `per`
-//   money     +$N when the hand scores     extra    raise a round setting by `amount`
+//   addMult    +N mult, N from `per`       mulMult   x N mult, N from `per`
+//   money      +$N when the hand scores    extra     raise a round setting by `amount`
+//   colorCards for each played card of `color` (wild color counts): `mult`, `points`,
+//              or a `chance` (0-1, rolled with the game's seed) of `money`
+//   allDifferentSet  x `mult` when the hand is a set with every attribute different
+//   singleDiscard    on the round's first discard, if it is 1 card: "duplicate" adds a copy
+//                    of it to your deck, "remove" takes it out of your deck for good
+//   recycle    played and discarded cards go back into the draw pile
+//   none       no effect yet (still being designed)
 // `per` values (worked out by Hands.counts):
 //   timesPlayed  times this hand type has been played this game, counting this one
 //   different    sets: attributes that are all different; of-a-kind hands: groups of identical cards
 //   same         sets: attributes that are all the same; of-a-kind hands: number of cards
-// unlocked: false hides a joker from drops until it is unlocked (unlocks come later).
+// unlocked: false hides a joker from drops until it is unlocked; `unlock` says how (tracking comes later).
 
 window.SETTRY_JOKER_RARITIES = {
   // Chance a dropped joker is this rarity. Legendary jokers never drop.
@@ -54,8 +61,34 @@ window.SETTRY_JOKERS = [
   { id: "fifthCard", name: "Fifth Card", rarity: "rare", art: "5",
     text: "Play up to 5 cards at a time.",
     effect: { type: "extra", setting: "maxPlay", amount: 1 }, unlocked: true },
+  { id: "dna", name: "Copycat", rarity: "rare", art: "⧉",
+    text: "If your first discard of the round is 1 card, add a copy of it to your deck.",
+    effect: { type: "singleDiscard", action: "duplicate" }, unlocked: true },
+  { id: "shredder", name: "Shredder", rarity: "rare", art: "✂",
+    text: "If your first discard of the round is 1 card, remove it from your deck.",
+    effect: { type: "singleDiscard", action: "remove" }, unlocked: true },
+  { id: "rainbowSet", name: "Full Spectrum", rarity: "rare", art: "×5",
+    text: "×5 mult if the hand is a set with every attribute different.",
+    effect: { type: "allDifferentSet", mult: 5 }, unlocked: true },
 
-  // Unique and legendary: still to come.
+  // Unique
+  { id: "recycle", name: "Recycle", rarity: "unique", art: "♻",
+    text: "Played and discarded cards go straight back into the draw pile.",
+    effect: { type: "recycle" }, unlocked: false, unlock: "Run out of cards in the draw pile." },
+  { id: "redJoker", name: "Red Joker", rarity: "unique", art: "R",
+    text: "+1 mult for each red card played.",
+    effect: { type: "colorCards", color: "red", mult: 1 }, unlocked: false, unlock: "Beat the red deck." },
+  { id: "blueJoker", name: "Blue Joker", rarity: "unique", art: "B",
+    text: "+10 points for each blue card played.",
+    effect: { type: "colorCards", color: "blue", points: 10 }, unlocked: false, unlock: "Beat the blue deck." },
+  { id: "greenJoker", name: "Green Joker", rarity: "unique", art: "G",
+    text: "Each green card played has a 50% chance to earn $1.",
+    effect: { type: "colorCards", color: "green", chance: 0.5, money: 1 }, unlocked: false, unlock: "Beat the green deck." },
+  { id: "blackJoker", name: "Black Joker", rarity: "unique", art: "K",
+    text: "TBD",
+    effect: { type: "none" }, unlocked: false, unlock: "Beat the black deck." },
+
+  // Legendary: still to come.
 ];
 
 // How "difference" and "match" are counted, shown on the jokers page.

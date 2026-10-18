@@ -136,10 +136,18 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Kaleidoscope | Multiply mult by the number of differences in the hand. |
 | Rare | Mirror | Multiply mult by the number of matches in the hand. No matches scores 0. |
 | Rare | Fifth Card | Play up to 5 cards at a time (the normal limit is 4). |
-| Unique | (to come) | |
+| Rare | Copycat | If your first discard of the round is 1 card, add a copy of it to your deck. |
+| Rare | Shredder | If your first discard of the round is 1 card, remove it from your deck. |
+| Rare | Full Spectrum | ×5 mult if the hand is a set with every attribute different. |
+| Unique | Recycle | Played and discarded cards go straight back into the draw pile (at random spots). Unlock: run out of cards in the draw pile. |
+| Unique | Red Joker | +1 mult for each red card played. Unlock: beat the red deck. |
+| Unique | Blue Joker | +10 points for each blue card played. Unlock: beat the blue deck. |
+| Unique | Green Joker | Each green card played has a 50% chance to earn $1 (rolled with the seed). Unlock: beat the green deck. |
+| Unique | Black Joker | TBD. Unlock: beat the black deck. |
 | Legendary | (to come) | |
 
-Money ($) is tracked but has no use yet.
+Money ($) is tracked but has no use yet. A wild color card counts as every color for the color jokers.
+Unlocks are listed but not tracked yet: that needs user accounts and saves (see `docs/TODO.md`). The test picker on the start menu offers every joker, locked or not.
 
 ## Open questions
 

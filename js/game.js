@@ -21,6 +21,7 @@ const Game = {
       maxPlay: setting("maxPlay"),
       timesPlayed: {},                        // hand id -> times played this game
       money: 0,
+      firstDiscardDone: false,                // for jokers that act on the round's first discard
       score: 0,
       playsLeft: setting("plays"),
       discardsLeft: setting("discards"),
@@ -65,11 +66,12 @@ const Game = {
     const s = Game.state;
     if (!Game.canPlay()) return;
     const hand = Game.selectedHand();
+    const lucky = Jokers.chanceMoney(s.jokers, Game.selectedCards(), s.random);
     s.score += hand.total;
-    s.money += hand.money;
+    s.money += hand.money + lucky;
     s.timesPlayed[hand.id] = (s.timesPlayed[hand.id] || 0) + 1;
     s.playsLeft--;
-    s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}`;
+    s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}` + (lucky ? ` · +$${lucky} from luck` : "");
     Game.replaceSelected();
     Game.checkEnd();
   },
@@ -79,18 +81,43 @@ const Game = {
     if (!Game.canDiscard()) return;
     s.discardsLeft--;
     s.message = `Discarded ${s.selected.length}.`;
-    Game.replaceSelected();
+    let removed = [];
+    if (!s.firstDiscardDone && s.selected.length === 1) {
+      const card = s.board[s.selected[0]];
+      for (const j of Jokers.has(s.jokers, "singleDiscard")) {
+        if (j.effect.action === "duplicate") {
+          const copy = { ...card, uid: Math.max(...s.runDeck.map((c) => c.uid)) + 1 };
+          s.runDeck.push(copy);
+          Game.shuffleIntoPile([copy]);
+          s.message += ` ${j.name} added a copy to your deck.`;
+        }
+        if (j.effect.action === "remove") {
+          s.runDeck = s.runDeck.filter((c) => c.uid !== card.uid);
+          removed = [card.uid];
+          s.message += ` ${j.name} removed it from your deck.`;
+        }
+      }
+    }
+    s.firstDiscardDone = true;
+    Game.replaceSelected(removed);
   },
 
   // Selected cards leave the board; cards from the draw pile take their spots.
-  // Once the pile is empty, the spots stay empty.
-  replaceSelected() {
+  // Once the pile is empty, the spots stay empty. With Recycle, the cards then go back into the pile.
+  replaceSelected(removed = []) {
     const s = Game.state;
-    for (const i of s.selected) {
-      s.used.add(s.board[i].uid);
-      s.board[i] = s.pile.length ? s.pile.shift() : null;
-    }
+    const gone = s.selected.map((i) => s.board[i]);
+    for (const i of s.selected) s.board[i] = s.pile.length ? s.pile.shift() : null;
     s.selected = [];
+    const back = Jokers.has(s.jokers, "recycle").length ? gone.filter((c) => !removed.includes(c.uid)) : [];
+    for (const c of gone) if (!back.includes(c)) s.used.add(c.uid);
+    Game.shuffleIntoPile(back);
+  },
+
+  // Put cards into the draw pile at random (seeded) places.
+  shuffleIntoPile(cards) {
+    const s = Game.state;
+    for (const c of cards) s.pile.splice(Rng.int(s.random, s.pile.length + 1), 0, c);
   },
 
   checkEnd() {

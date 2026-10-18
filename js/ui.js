@@ -135,7 +135,7 @@ $("play").onclick = async () => {
     const el = jokerEls[Game.state.jokers.indexOf(st.joker)];
     el.classList.add("scoring");
     el.dataset.label = st.label;
-    $("hand-box").innerHTML = handBox(hand, { points: hand.points, mult: st.mult });
+    $("hand-box").innerHTML = handBox(hand, { points: st.points, mult: st.mult });
     await wait(stepMs);
   }
   $("hand-box").innerHTML = handBox(hand, { points: hand.points, mult: hand.mult, done: true });

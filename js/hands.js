@@ -55,8 +55,8 @@ const Hands = {
       steps.push({ card, add, points });
     }
     const counts = Jokers.counts(cards, id, ((ctx.timesPlayed || {})[id] || 0) + 1);
-    const j = Jokers.apply(ctx.jokers || [], counts, hand.mult);
-    return { steps, jokerSteps: j.steps, points, baseMult: hand.mult, mult: j.mult, money: j.money, total: points * j.mult };
+    const j = Jokers.apply(ctx.jokers || [], counts, cards, points, hand.mult);
+    return { steps, jokerSteps: j.steps, cardPoints: points, points: j.points, baseMult: hand.mult, mult: j.mult, money: j.money, total: j.points * j.mult };
   },
 
   // The best-scoring hand made by all of the played cards together, or null.

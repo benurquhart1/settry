@@ -22,7 +22,7 @@
       const jokers = window.SETTRY_JOKERS.filter((j) => j.rarity === id);
       const odds = r.weight ? `${r.weight}% of drops` : "never drops";
       return `<h2>${r.name} <small>(${odds})</small></h2>
-        <div class="joker-row" style="justify-content:flex-start">${jokers.length ? jokers.map((j) => jokerHtml(j)).join("") : "<p class='hint'>None yet.</p>"}</div>`;
+        <div class="joker-row" style="justify-content:flex-start">${jokers.length ? jokers.map((j) => jokerHtml(j, "", true)).join("") : "<p class='hint'>None yet.</p>"}</div>`;
     }).join("");
     document.getElementById("glossary").innerHTML = Object.entries(window.SETTRY_JOKER_GLOSSARY)
       .map(([w, d]) => `<dt><b>${w[0].toUpperCase() + w.slice(1)}</b></dt><dd>${d}</dd>`).join("");

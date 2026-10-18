@@ -10,6 +10,7 @@ Open `index.html` in a browser. That's it. `gallery.html` shows every card.
 ## Where things live
 
 - `docs/RULES.md`: the rules, in words. Start here.
+- `docs/TODO.md`: things to come back to.
 - `data/config.js`: the numbers (deck size, board size, sets to win, discards).
 - `data/decks.js`: starting decks.
 - `data/hands.js`: hands you can play and what they score.
