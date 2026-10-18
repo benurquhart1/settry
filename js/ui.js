@@ -84,7 +84,7 @@ function render() {
   const cfg = window.SETTRY_CONFIG;
   const r = Game.roundInfo();
   const where = s.phase === "shop" || s.phase === "pack" ? `Shop after the ${r.name.toLowerCase()}` : `${r.name} · Target ${r.target}`;
-  $("status").innerHTML = `<b>Ante ${s.ante}/${cfg.antes}</b> · ${where} · <b>$${s.money}</b> · Seed ${s.seed}`;
+  $("status").innerHTML = `<b>Ante ${s.ante}/${cfg.antes}</b> · ${where} · <b>${s.money < 0 ? `-$${-s.money}` : `$${s.money}`}</b> · Seed ${s.seed}`;
   const selling = s.phase === "shop" || s.phase === "pack";
   $("jokers").innerHTML = s.jokers.map((id, k) => `<div class="held">${jokerHtml(Jokers.byId(id))}` +
     `${selling ? `<button class="sell" data-k="${k}">Sell $${Jokers.sellPrice(id)}</button>` : ""}</div>`).join("") ||
@@ -101,7 +101,7 @@ function render() {
   if (s.phase === "pack") renderPack();
   if (s.phase === "lost") {
     $("end-title").textContent = "Run over";
-    $("end-text").textContent = `You scored ${s.score} of ${s.target} in the ${r.name.toLowerCase()} of ante ${s.ante}.`;
+    $("end-text").textContent = s.lostReason || `You scored ${s.score} of ${s.target} in the ${r.name.toLowerCase()} of ante ${s.ante}.`;
   }
   if (s.phase === "won") {
     $("end-title").textContent = "You beat the run!";
@@ -208,9 +208,10 @@ $("discard").onclick = () => { if (!animating) { Game.discard(); render(); } };
 // Cash out, shop and packs ---------------------------------------------
 
 function renderCashout() {
-  const e = Game.earnings();
-  $("cashout-lines").innerHTML = e.lines.map((l) => `<div class="line"><span>${l.label}</span><b>+$${l.amount}</b></div>`).join("") +
-    `<div class="line total"><span>Total</span><b>+$${e.total}</b></div>`;
+  const e = Game.state.payout;
+  const $n = (n) => n < 0 ? `-$${-n}` : `+$${n}`;
+  $("cashout-lines").innerHTML = e.lines.map((l) => `<div class="line"><span>${l.label}</span><b>${$n(l.amount)}</b></div>`).join("") +
+    `<div class="line total"><span>Total</span><b>${$n(e.total)}</b></div>`;
 }
 
 function rarityLabel(id) {
@@ -226,9 +227,9 @@ function renderShop() {
   $("shop-packs").innerHTML = s.shop.packs.map((p, i) => `<div class="offer">
       <div class="pack pack-${p.kind}${p.sold ? " sold" : ""}"><b>${p.name}</b>
         <span>Choose ${p.picks} of ${p.options} ${{ card: "cards to add to your deck", joker: "jokers", charm: "charms" }[p.kind]}</span></div>
-      <button data-buy-pack="${i}" ${!p.sold && s.money >= p.price ? "" : "disabled"}>${p.sold ? "Opened" : `Buy $${p.price}`}</button></div>`).join("");
+      <button data-buy-pack="${i}" ${!p.sold && Game.canSpend(p.price) ? "" : "disabled"}>${p.sold ? "Opened" : `Buy $${p.price}`}</button></div>`).join("");
   $("reroll").textContent = `Reroll $${s.shop.rerollCost}`;
-  $("reroll").disabled = s.money < s.shop.rerollCost;
+  $("reroll").disabled = !Game.canSpend(s.shop.rerollCost);
 }
 
 function renderPack() {

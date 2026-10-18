@@ -34,7 +34,7 @@ const Shop = {
   canBuyJoker(i) {
     const s = Game.state;
     const o = s.shop.jokers[i];
-    return o && !o.sold && s.money >= o.price && s.jokers.length < window.SETTRY_CONFIG.jokerSlots;
+    return o && !o.sold && Game.canSpend(o.price) && s.jokers.length < window.SETTRY_CONFIG.jokerSlots;
   },
 
   buyJoker(i) {
@@ -49,7 +49,7 @@ const Shop = {
   // Rerolling replaces the joker offers (not the packs). Each reroll costs $1 more; resets next shop.
   reroll() {
     const s = Game.state;
-    if (s.money < s.shop.rerollCost) return;
+    if (!Game.canSpend(s.shop.rerollCost)) return;
     s.money -= s.shop.rerollCost;
     s.shop.rerollCost += window.SETTRY_CONFIG.rerollStep;
     Shop.fillJokers();
@@ -59,7 +59,7 @@ const Shop = {
   buyPack(i) {
     const s = Game.state;
     const p = s.shop.packs[i];
-    if (!p || p.sold || s.money < p.price) return;
+    if (!p || p.sold || !Game.canSpend(p.price)) return;
     s.money -= p.price;
     p.sold = true;
     const options = [];

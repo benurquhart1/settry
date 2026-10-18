@@ -10,8 +10,7 @@ window.SETTRY_CONFIG = {
   ],
   startMoney: 5,
   moneyPerHandLeft: 1, // paid for each unused hand when a round is won
-  interestPer: 5,      // +$1 interest for every $5 held at cash out...
-  interestMax: 5,      // ...up to $5
+  // No standard interest (ben, 2026-10-18): it comes from the Credit Union, Bank and Treasury jokers.
 
   // Shop
   shopJokerSlots: 2,   // jokers for sale at once (the Shopkeeper joker adds 1)

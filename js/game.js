@@ -54,24 +54,72 @@ const Game = {
     });
   },
 
-  // What winning the round pays: the round's reward, $1 per unused hand, and interest.
+  // What winning the round pays: the round's reward and $1 per unused hand, then money jokers
+  // (interest, gambles, Loan Shark's debt interest) left to right, each on the running balance.
+  // Worked out once when the round is won (gambles roll with the seed), shown at cash out.
   earnings() {
     const cfg = window.SETTRY_CONFIG;
     const s = Game.state;
     const lines = [
       { label: `${Game.roundInfo().name} beaten`, amount: Game.roundInfo().reward },
       { label: `${s.playsLeft} unused hand${s.playsLeft === 1 ? "" : "s"}`, amount: s.playsLeft * cfg.moneyPerHandLeft },
-      { label: `Interest ($1 per $${cfg.interestPer}, up to $${cfg.interestMax})`,
-        amount: Math.min(cfg.interestMax, Math.floor(s.money / cfg.interestPer)) },
     ].filter((l) => l.amount > 0);
+    let money = s.money + lines.reduce((t, l) => t + l.amount, 0);
+    for (const id of s.jokers) {
+      const j = Jokers.byId(id);
+      const e = j.effect;
+      let amount = 0;
+      let label = j.name;
+      if (e.type === "interest" && money > 0) {
+        amount = Math.floor(money * e.rate);
+        if (e.max !== null) amount = Math.min(e.max, amount);
+        label += ` (${Math.round(e.rate * 100)}% interest)`;
+      }
+      if (e.type === "moneyGamble" && money > 0) {
+        const win = s.rng.luck() < e.chance;
+        amount = Math.round(money * (win ? e.win : e.lose)) - money;
+        label += win ? ` (×${e.win})` : ` (×${e.lose})`;
+      }
+      if (e.type === "loanShark" && money < 0) {
+        amount = -Math.ceil(-money * e.rate);
+        label += ` (${Math.round(e.rate * 100)}% interest on $${-money} debt)`;
+      }
+      if (!amount) continue;
+      lines.push({ label, amount });
+      money += amount;
+    }
     return { lines, total: lines.reduce((t, l) => t + l.amount, 0) };
   },
 
   cashOut() {
     const s = Game.state;
     if (s.phase !== "cashout") return;
-    s.money += Game.earnings().total;
+    s.money += s.payout.total;
+    s.payout = null;
+    if (Game.checkDebt()) return;
     Shop.open();
+  },
+
+  // Lowest your money can go before you lose: Loan Shark's limit, otherwise $0.
+  // Returns the lowest balance spending may leave you with.
+  minMoney() {
+    const shark = Jokers.has(Game.state.jokers, "loanShark")[0];
+    return shark ? shark.effect.limit + 1 : 0;
+  },
+
+  canSpend(amount) {
+    return Game.state.money - amount >= Game.minMoney();
+  },
+
+  // Lose the run if your money is below what you're allowed (in debt without Loan Shark, or at its limit).
+  checkDebt() {
+    const s = Game.state;
+    if (s.money >= Game.minMoney()) return false;
+    s.phase = "lost";
+    s.lostReason = Jokers.has(s.jokers, "loanShark").length
+      ? `Your debt reached $${-s.money}: the Loan Shark came to collect.`
+      : `You were $${-s.money} in debt without the Loan Shark.`;
+    return true;
   },
 
   // Leave the shop: on to the next round, or the next ante after the boss.
@@ -89,6 +137,7 @@ const Game = {
     if (!id || s.phase === "round") return;
     s.money += Jokers.sellPrice(id);
     s.jokers.splice(k, 1);
+    Game.checkDebt();
   },
 
   selectedCards() {
@@ -206,6 +255,7 @@ const Game = {
     if (s.score >= s.target) {
       const last = s.ante === window.SETTRY_CONFIG.antes && s.roundIndex === window.SETTRY_CONFIG.rounds.length - 1;
       s.phase = last ? "won" : "cashout";
+      if (!last) s.payout = Game.earnings();
     } else if (s.playsLeft === 0) s.phase = "lost";
   },
 };

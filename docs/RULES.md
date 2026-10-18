@@ -69,7 +69,11 @@ A run plays like Balatro (ben, 2026-10-18). Numbers live in `data/config.js`.
 
 Ante targets (placeholders, to tune): 100, 250, 600, 1500, 3500, 6500, 11500, 16500.
 
-When you win a round you also get **$1 for each unused hand**, plus **interest of $1 for every $5 you hold, up to $5** (both like Balatro).
+When you win a round you also get **$1 for each unused hand** (like Balatro).
+There is **no standard interest** (ben, 2026-10-18): interest only comes from the Credit Union, Bank and Treasury jokers.
+At cash out, after the reward and unused hands are added, money jokers apply left to right, each on the running balance: interest, Day Trader and Gambler rolls, and Loan Shark's debt interest. Money amounts are rounded to whole dollars (interest down, debt interest up).
+
+**Debt.** Your money can't go below $0 unless you hold the Loan Shark joker; with it, you can spend down to -$49. You lose the run if your money reaches -$50, or if you are below $0 without the Loan Shark (for example after selling it while in debt).
 Boss rounds don't have special rules yet.
 
 ## The shop
@@ -214,17 +218,25 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Common | Variety | +1 mult for each difference in the hand. |
 | Common | Overtime | +1 hand each round. |
 | Common | Recycler | +1 discard each round. |
+| Common | Plain Joker | +4 mult. |
+| Common | Credit Union | At cash out, earn 20% interest on your money, up to $5. |
 | Uncommon | Big Table | +2 cards on the board. |
 | Uncommon | Odd One Out | Earn $1 for each difference in the hand. |
 | Uncommon | Birds of a Feather | Earn $1 for each match in the hand. |
 | Uncommon | Shopkeeper | +1 joker for sale in the shop. |
 | Uncommon | Numberfile | +1 mult for each different number played. |
+| Uncommon | Bank | At cash out, earn 10% interest on your money, up to $20. |
+| Uncommon | Day Trader | At cash out: 50% chance your money ×1.25, 50% chance ×0.8 (only when above $0). |
 | Rare | Kaleidoscope | Multiply mult by the number of differences in the hand. |
 | Rare | Mirror | Multiply mult by the number of matches in the hand. No matches scores 0. |
 | Rare | Fifth Card | Play up to 5 cards at a time (the normal limit is 4). |
 | Rare | Copycat | If your first discard of the round is 1 card, add a copy of it to your deck. |
 | Rare | Shredder | If your first discard of the round is 1 card, remove it from your deck. |
 | Rare | Full Spectrum | ×5 mult if the hand is a set with every attribute different. |
+| Rare | Treasury | At cash out, earn 5% interest on your money, with no limit. |
+| Rare | Gambler | At cash out: 80% chance your money ×1.3, 20% chance it drops to $0 (only when above $0). |
+| Rare | Loan Shark | You can go into debt (see Debt above). At cash out, pay 20% interest on your debt. |
+| Rare | High Five | Each 5 played gives +5 mult. |
 | Unique | Recycle | Played and discarded cards go straight back into the draw pile (at random spots). Unlock: run out of cards in the draw pile. |
 
 **Deck jokers** (common, ben 2026-10-18): one per starting deck, unlocked by beating that deck.

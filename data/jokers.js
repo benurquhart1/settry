@@ -1,7 +1,7 @@
 // Jokers. Effects are data; js/jokers.js applies them. Names and art are placeholders until ben picks them.
 //
 // effect types:
-//   addMult    +N mult, N from `per`       mulMult   x N mult, N from `per`
+//   addMult    +N mult, N from `per` (or a flat `amount`)       mulMult   x N mult, N from `per`
 //   money      +$N when the hand scores    extra     raise a round setting by `amount`
 //   cardsWith  for each played card whose `attribute` is `value` (a wild card counts):
 //              `mult` (+mult), `points` (+points), or a `chance` (0-1) of `money` or `xMult`.
@@ -11,6 +11,11 @@
 //   singleDiscard    on the round's first discard, if it is 1 card: "duplicate" adds a copy
 //                    of it to your deck, "remove" takes it out of your deck for good
 //   recycle    played and discarded cards go back into the draw pile
+//   interest   at cash out, +`rate` of your money (rounded down), at most `max` (null = no cap)
+//   moneyGamble  at cash out, with chance `chance` your money x `win`, otherwise x `lose`
+//              (only when your money is above $0)
+//   loanShark  lets your money go below $0, down to (not reaching) `limit`; at cash out you pay
+//              `rate` of your debt (rounded up). Reach `limit`, or be below $0 without it, and you lose.
 //   none       no effect yet (still being designed)
 // `per` values (worked out by Hands.counts):
 //   timesPlayed  times this hand type has been played this game, counting this one
@@ -32,6 +37,12 @@ window.SETTRY_JOKERS = [
   { id: "encore", name: "Encore", rarity: "common", art: "↻",
     text: "+1 mult for each time this hand has been played this game.",
     effect: { type: "addMult", per: "timesPlayed" }, unlocked: true },
+  { id: "plainJoker", name: "Plain Joker", rarity: "common", art: "+4",
+    text: "+4 mult.",
+    effect: { type: "addMult", amount: 4 }, unlocked: true },
+  { id: "creditUnion", name: "Credit Union", rarity: "common", art: "%",
+    text: "At cash out, earn 20% interest on your money, up to $5.",
+    effect: { type: "interest", rate: 0.2, max: 5 }, unlocked: true },
   { id: "variety", name: "Variety", rarity: "common", art: "≠",
     text: "+1 mult for each difference in the hand.",
     effect: { type: "addMult", per: "different" }, unlocked: true },
@@ -58,6 +69,12 @@ window.SETTRY_JOKERS = [
   { id: "numberfile", name: "Numberfile", rarity: "uncommon", art: "#",
     text: "+1 mult for each different number played.",
     effect: { type: "distinctNumbers", mult: 1 }, unlocked: true },
+  { id: "bank", name: "Bank", rarity: "uncommon", art: "🏦",
+    text: "At cash out, earn 10% interest on your money, up to $20.",
+    effect: { type: "interest", rate: 0.1, max: 20 }, unlocked: true },
+  { id: "dayTrader", name: "Day Trader", rarity: "uncommon", art: "📈",
+    text: "At cash out: 50% chance your money ×1.25, 50% chance ×0.8.",
+    effect: { type: "moneyGamble", chance: 0.5, win: 1.25, lose: 0.8 }, unlocked: true },
   { id: "diamondJoker", name: "Diamond Joker", rarity: "common", art: "♦",
     text: "Each diamond played has a 50% chance of ×2 mult.",
     effect: { type: "cardsWith", attribute: "shape", value: "diamond", chance: 0.5, xMult: 2 }, unlocked: false, unlock: "Beat the diamond deck." },
@@ -87,6 +104,18 @@ window.SETTRY_JOKERS = [
   { id: "rainbowSet", name: "Full Spectrum", rarity: "rare", art: "×5",
     text: "×5 mult if the hand is a set with every attribute different.",
     effect: { type: "allDifferentSet", mult: 5 }, unlocked: true },
+  { id: "treasury", name: "Treasury", rarity: "rare", art: "🏛",
+    text: "At cash out, earn 5% interest on your money, with no limit.",
+    effect: { type: "interest", rate: 0.05, max: null }, unlocked: true },
+  { id: "gambler", name: "Gambler", rarity: "rare", art: "🎲",
+    text: "At cash out: 80% chance your money ×1.3, 20% chance it drops to $0.",
+    effect: { type: "moneyGamble", chance: 0.8, win: 1.3, lose: 0 }, unlocked: true },
+  { id: "loanShark", name: "Loan Shark", rarity: "rare", art: "🦈",
+    text: "You can go into debt. Pay 20% interest on debt at cash out. Lose at -$50, or in debt without this joker.",
+    effect: { type: "loanShark", rate: 0.2, limit: -50 }, unlocked: true },
+  { id: "highFive", name: "High Five", rarity: "rare", art: "5+",
+    text: "Each 5 played gives +5 mult.",
+    effect: { type: "cardsWith", attribute: "count", value: 5, mult: 5 }, unlocked: true },
 
   // Unique (Recycle). The deck jokers below are common, one per starting deck.
   { id: "recycle", name: "Recycle", rarity: "unique", art: "♻",

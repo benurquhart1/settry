@@ -45,7 +45,7 @@ const Jokers = {
     const step = (joker, label) => steps.push({ joker, label, points, mult });
     for (const id of jokerIds) {
       const e = Jokers.byId(id).effect;
-      const n = counts[e.per];
+      const n = e.amount ?? counts[e.per];
       if (e.type === "addMult") { mult += n; step(id, `+${n} mult`); }
       if (e.type === "mulMult") { mult *= n; step(id, `×${n} mult`); }
       if (e.type === "money") { money += n; step(id, `+$${n}`); }
