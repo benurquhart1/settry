@@ -46,6 +46,8 @@ window.SETTRY_FIGHTS = {
       { name: "Boosted Deck Cards", kind: "card", options: 5, picks: 2, deckLimited: true, modChance: 1 },
     ],
   ],
+  // Opened before the first fight of every run (ben, 2026-10-18): jokers at the normal drop rates.
+  startPack: { name: "Starting Jokers", kind: "joker", options: 3, picks: 1 },
   // Placeholder opponent names.
   names: ["Ada", "Bram", "Cleo", "Dex", "Edie", "Finn", "Gus", "Hana", "Ivo", "Juno", "Kit", "Lev",
     "Mae", "Nico", "Olga", "Pip", "Quin", "Rosa", "Sol", "Tess", "Uma", "Vic", "Wren", "Yara", "Zed"],

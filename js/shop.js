@@ -70,7 +70,7 @@ const Shop = {
   },
 
   // Open a pack (or a fight's prize): roll its options. `after` is where to go once done:
-  // "shop" back to the shop, "fight" on to choosing the next fight.
+  // "shop" back to the shop, "fight" on to choosing the next fight, "start" to the first fight.
   openPack(p, after) {
     const s = Game.state;
     const options = [];
@@ -131,6 +131,7 @@ const Shop = {
     const after = s.pack?.after;
     s.pack = null;
     if (after === "fight") Game.nextFight();
+    else if (after === "start") s.phase = "choose";   // the first fight's opponents are already rolled
     else s.phase = "shop";
   },
 };

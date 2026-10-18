@@ -85,7 +85,8 @@ function render() {
   const r = Game.roundInfo();
   const total = window.SETTRY_FIGHTS.count;
   const fight = s.endless ? `Endless fight ${s.fightNumber}` : `Fight ${s.fightNumber}/${total}`;
-  const where = s.phase === "pack" && s.pack.after === "fight" ? `Prize for beating ${r.name}`
+  const where = s.phase === "pack" && s.pack.after === "start" ? "Pick a joker to start with"
+    : s.phase === "pack" && s.pack.after === "fight" ? `Prize for beating ${r.name}`
     : s.phase === "shop" || s.phase === "pack" ? "Shop"
     : s.phase === "choose" ? "Choose your opponent"
     : `vs ${r.name}${r.boss ? " (boss)" : ""} · Target ${r.target}`;

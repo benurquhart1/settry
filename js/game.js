@@ -26,6 +26,7 @@ const Game = {
       phase: "choose",                        // choose, round, cashout, shop, pack, lost, won
     };
     Game.nextFight();
+    Shop.openPack(window.SETTRY_FIGHTS.startPack, "start");
   },
 
   isBoss(n) {

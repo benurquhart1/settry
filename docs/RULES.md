@@ -59,6 +59,7 @@ More hands, including a set of 5, are to come.
 A run is a ladder of **20 fights**, then endless mode (ben, 2026-10-18, moving away from Balatro's antes). Fights, targets and rewards live in `data/fights.js`; other numbers in `data/config.js`.
 
 - You start with **$5** and your starting deck. Your deck carries over from fight to fight, and it's fully reshuffled at the start of each fight.
+- Every run starts with a free **Starting Jokers** pack: choose 1 of 3 jokers (normal drop rates), or skip.
 - Before each fight you **choose one of 2 opponents**. Each shows its target (points needed), its reward, and any modifier.
 - **Every 4th fight is a boss** (fights 4, 8, 12, 16 and 20), with 3 regular fights in between. Fail to reach a fight's target and the run is over.
 - Beat fight 20 to win the run. Then you can keep going in **endless mode** (like Balatro), where targets keep growing.
