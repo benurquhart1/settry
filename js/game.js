@@ -59,9 +59,9 @@ const Game = {
     const s = Game.state;
     if (!Game.canPlay()) return;
     const hand = Game.selectedHand();
-    s.score += hand.score;
+    s.score += hand.total;
     s.playsLeft--;
-    s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.score}`;
+    s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}`;
     Game.replaceSelected();
     Game.checkEnd();
   },

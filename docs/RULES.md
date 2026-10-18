@@ -19,7 +19,14 @@ Every combination is one card, so the full deck is 4 × 4 × 4 × 4 = 256 cards.
 
 ## Hands
 
-Each play uses 2 to 5 cards from your hand. The play scores its best hand: **points × mult**.
+Each play uses 2 to 5 cards from your hand. The play scores its best hand, Balatro-style:
+
+1. Start with the hand's points and mult (table below).
+2. Each played card adds its own points, one at a time, **in the order you selected them**: a card adds its number (1 to 4), and a wild number adds 5.
+3. Score = points × mult.
+
+For example, a set of 4 with numbers 2, 4, 3, 1 scores (20 + 2 + 4 + 3 + 1) × 3 = 90.
+On screen, selected cards move to a row above the board in the order you clicked them (and fade on the board), and score one by one when you play.
 Every card you play has to be part of the hand: no extra cards.
 For example, you can't play 4 cards when only 3 of them form a set.
 The list and numbers live in `data/hands.js`; how each is recognized is in `js/hands.js`.
@@ -63,7 +70,7 @@ Modifications live in `data/modifiers.js`. A card lists the ones it has in `card
 | Modification | Effect | Looks like |
 |--------------|--------|------------|
 | Wild suit | Counts as any shape when checking a set. | A circle in place of the suit. |
-| Wild number | Counts as any number. | 5 symbols in a circle. |
+| Wild number | Counts as any number. Adds 5 points when it scores. | 5 symbols in a circle. |
 | Wild color | Counts as any color. | Rainbow running diagonally across the card, red at top left to violet at bottom right. |
 | Wild shading | Counts as any shading. | Polka dots inside the shapes. |
 

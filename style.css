@@ -25,7 +25,16 @@ button.card { cursor: pointer; }
 /* Round */
 .table { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
 #board { display: grid; grid-template-columns: repeat(4, minmax(0, 90px)); gap: 8px; }
-#board .card { width: 100%; height: auto; aspect-ratio: 90 / 112; }
+#board .card, #picked .card { width: 100%; height: auto; aspect-ratio: 90 / 112; }
+.play-area { display: grid; gap: 12px; width: min(384px, 100%); }
+#picked { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding-bottom: 12px; border-bottom: 2px solid #ccc; }
+#picked .card { position: relative; border-color: #f90; }
+#picked .card.empty { border-color: #ccc; }
+#picked .add { position: absolute; top: 2px; right: 4px; font-size: 13px; font-weight: bold; color: #1565c0; opacity: 0; }
+#picked .card.scoring { background: #e3f0ff; border-color: #1565c0; transform: translateY(-4px); transition: transform .15s; }
+#picked .card.scoring .add { opacity: 1; }
+#board .card.picked { opacity: 0.3; }
+.hand-steps { color: #1565c0; font-size: 14px; margin-top: 4px; }
 aside { width: 260px; max-width: 100%; }
 #hand-box { border: 2px solid #333; border-radius: 8px; padding: 12px; background: #fff; text-align: center; }
 .hand-name { font-size: 20px; font-weight: bold; }

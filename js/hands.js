@@ -37,13 +37,33 @@ const Hands = {
     set4: (c) => c.length === 4 && Deck.isSet(c),
   },
 
+  // Points a card adds when it scores: its number, or the wild number's points.
+  cardPoints(card) {
+    const wild = (card.mods || []).map((m) => window.SETTRY_MODIFIERS[m]).find((m) => m?.wild === "count");
+    return wild ? wild.points : card.count;
+  },
+
+  // Scores a hand Balatro-style: start from the hand's points and mult, then each card,
+  // in the order given (the order clicked), adds its points. Total = points x mult.
+  score(cards, hand) {
+    const steps = [];
+    let points = hand.points;
+    for (const card of cards) {
+      const add = Hands.cardPoints(card);
+      points += add;
+      steps.push({ card, add, points });
+    }
+    return { steps, points, mult: hand.mult, total: points * hand.mult };
+  },
+
   // The best-scoring hand made by all of the played cards together, or null.
   // Every played card has to be part of the hand: no extra cards.
   best(cards) {
     let best = null;
     for (const [id, hand] of Object.entries(window.SETTRY_HANDS)) {
-      const score = hand.points * hand.mult;
-      if ((!best || score > best.score) && Hands.checks[id]?.(cards)) best = { id, ...hand, score };
+      if (!Hands.checks[id]?.(cards)) continue;
+      const scored = Hands.score(cards, hand);
+      if (!best || scored.total > best.total) best = { id, ...hand, ...scored };
     }
     return best;
   },

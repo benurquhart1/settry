@@ -12,6 +12,7 @@ window.SETTRY_MODIFIERS = {
     name: "Wild number",
     text: "Counts as any number.",
     wild: "count",
+    points: 5,              // points the card adds when it scores
     draw: { symbols: 5 },   // this many symbols in a circle
   },
   wildColor: {

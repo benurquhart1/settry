@@ -33,41 +33,88 @@ $("menu-btn").onclick = showMenu;
 
 // Round -----------------------------------------------------------------
 
+let animating = false;
+
+// The hand box. `shown` overrides the points while a play is being scored.
+function handBox(hand, shown) {
+  if (!hand) {
+    const n = Game.state.selected.length;
+    return `<div class="hand-name muted">${n ? "Not a hand" : "Select cards"}</div>
+      <div class="hand-score muted">points × mult</div>`;
+  }
+  const base = window.SETTRY_HANDS[hand.id].points;
+  const points = shown ? shown.points : hand.points;
+  const total = shown && !shown.done ? "" : ` = ${hand.total}`;
+  return `<div class="hand-name">${hand.name}</div>
+    <div class="hand-steps">${base}${hand.steps.map((st) => ` + ${st.add}`).join("")}</div>
+    <div class="hand-score"><span class="pts">${points}</span> × <span class="mult">${hand.mult}</span>${total}</div>`;
+}
+
 function render() {
   const s = Game.state;
   const cfg = window.SETTRY_CONFIG;
+  const hand = Game.selectedHand();
+
+  // Top row: the selected cards in the order clicked, with the points each adds.
+  const slots = Array.from({ length: cfg.maxPlay }, (_, n) => {
+    const i = s.selected[n];
+    if (i === undefined) return `<div class="card empty"></div>`;
+    const c = s.board[i];
+    return `<button class="card" data-i="${i}" title="${c.id}">${cardSvg(c)}<span class="add">+${Hands.cardPoints(c)}</span></button>`;
+  });
+  $("picked").innerHTML = slots.join("");
+
   $("board").innerHTML = s.board
     .map((c, i) => c
-      ? `<button class="card${s.selected.includes(i) ? " sel" : ""}" data-i="${i}" title="${c.id}">${cardSvg(c)}</button>`
+      ? `<button class="card${s.selected.includes(i) ? " picked" : ""}" data-i="${i}" title="${c.id}">${cardSvg(c)}</button>`
       : `<div class="card empty"></div>`)
     .join("");
 
-  const hand = Game.selectedHand();
-  $("hand-box").innerHTML = hand
-    ? `<div class="hand-name">${hand.name}</div>
-       <div class="hand-score"><span class="pts">${hand.points}</span> × <span class="mult">${hand.mult}</span> = ${hand.score}</div>`
-    : `<div class="hand-name muted">${s.selected.length ? "Not a hand" : "Select cards"}</div>
-       <div class="hand-score muted">points × mult</div>`;
-
+  $("hand-box").innerHTML = handBox(hand);
   $("info").innerHTML = `Score <b>${s.score}</b> / ${cfg.roundTarget}<br>
     Hands left ${s.playsLeft} · Discards left ${s.discardsLeft}<br>
     Draw pile ${s.pile.length} · Seed ${s.seed}`;
   const over = s.over === "won" ? `You win with ${s.score}!` : s.over === "lost" ? `Out of hands at ${s.score}. You lose.` : "";
   $("msg").textContent = over || s.message;
-  $("play").disabled = !Game.canPlay();
-  $("discard").disabled = !Game.canDiscard();
+  $("play").disabled = animating || !Game.canPlay();
+  $("discard").disabled = animating || !Game.canDiscard();
   $("discard").textContent = `Discard (${s.discardsLeft})`;
   $("play").textContent = `Play hand (${s.playsLeft})`;
 }
 
-$("board").addEventListener("click", (e) => {
+function onCardClick(e) {
   const el = e.target.closest("button.card");
-  if (!el) return;
+  if (!el || animating) return;
   Game.toggle(Number(el.dataset.i));
   render();
-});
-$("play").onclick = () => { Game.play(); render(); };
-$("discard").onclick = () => { Game.discard(); render(); };
+}
+$("board").addEventListener("click", onCardClick);
+$("picked").addEventListener("click", onCardClick);
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const stepMs = matchMedia("(prefers-reduced-motion: reduce)").matches ? 120 : 450;
+
+// Score the play one card at a time, in the order clicked, then apply it.
+$("play").onclick = async () => {
+  const hand = Game.selectedHand();
+  if (!hand || !Game.canPlay()) return;
+  animating = true;
+  render();
+  const slots = $("picked").querySelectorAll(".card");
+  $("hand-box").innerHTML = handBox(hand, { points: window.SETTRY_HANDS[hand.id].points });
+  await wait(stepMs);
+  for (const [n, st] of hand.steps.entries()) {
+    slots[n].classList.add("scoring");
+    $("hand-box").innerHTML = handBox(hand, { points: st.points });
+    await wait(stepMs);
+  }
+  $("hand-box").innerHTML = handBox(hand, { points: hand.points, done: true });
+  await wait(stepMs * 2);
+  animating = false;
+  Game.play();
+  render();
+};
+$("discard").onclick = () => { if (!animating) { Game.discard(); render(); } };
 
 // Deck viewer -----------------------------------------------------------
 
