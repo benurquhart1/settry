@@ -1,5 +1,5 @@
 // Hands you can play, with their points and multiplier. Score = points x mult.
-// "Of a kind" means cards with the same number (count). How each hand is recognized is in js/hands.js.
+// "Of a kind" means identical cards (same on all four attributes; wild attributes match anything). How each hand is recognized is in js/hands.js.
 window.SETTRY_HANDS = {
   pair:        { name: "Pair",            points: 10,  mult: 2 },
   twoPair:     { name: "Two pair",        points: 30,  mult: 2 },

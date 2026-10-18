@@ -26,22 +26,22 @@ The list and numbers live in `data/hands.js`; how each is recognized is in `js/h
 
 | Hand | Cards | Points | Mult | Score |
 |------|-------|--------|------|-------|
-| Pair | 2 with the same number | 10 | 2 | 20 |
+| Pair | 2 identical cards | 10 | 2 | 20 |
 | Set of 3 | 3 that are part of a full set | 10 | 2 | 20 |
-| Three of a kind | 3 with the same number | 20 | 3 | 60 |
+| Three of a kind | 3 identical cards | 20 | 3 | 60 |
 | Set of 4 | a full set | 20 | 3 | 60 |
-| Two pair | 2 + 2 with the same number | 30 | 2 | 60 |
-| Full house | 3 + 2 with the same number | 40 | 4 | 160 |
-| Four of a kind | 4 with the same number | 50 | 5 | 250 |
-| Five of a kind | 5 with the same number | 100 | 8 | 800 |
+| Two pair | 2 identical + 2 identical | 30 | 2 | 60 |
+| Full house | 3 identical + 2 identical | 40 | 4 | 160 |
+| Four of a kind | 4 identical cards | 50 | 5 | 250 |
+| Five of a kind | 5 identical cards | 100 | 8 | 800 |
 
-"Of a kind" means the same **number** (1 to 4 symbols), like ranks in poker.
+"Of a kind" means **identical cards**: the same number, shape, shading and color (ben, 2026-10-18). Decks are drawn with replacement, so duplicates happen. A wild attribute matches anything.
 
 **Sets.** For each of the four attributes (number, shape, shading, color), the cards are all the same or all different.
 A set of 4 is a full set; a set of 3 is three cards that follow the same rule.
 (The earlier "two pairs also count" set rule is off: `allowPairs` in `data/config.js`.)
 
-**Wild cards** count as any value of their attribute. A wild number helps both sets and "of a kind" hands.
+**Wild cards** count as any value of their attribute. Wilds help both sets and "of a kind" hands.
 
 More hands, including a set of 5, are to come.
 
