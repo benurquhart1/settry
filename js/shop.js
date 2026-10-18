@@ -73,6 +73,13 @@ const Shop = {
   // "shop" back to the shop, "fight" on to choosing the next fight, "start" to the first fight.
   openPack(p, after) {
     const s = Game.state;
+    s.pack = { ...p, options: Shop.packOptions(p), picksLeft: p.picks, after,
+      freeRerolls: after === "fight" ? Jokers.total(s.jokers, "freePrizeReroll") : 0 };
+    s.phase = "pack";
+  },
+
+  packOptions(p) {
+    const s = Game.state;
     const options = [];
     for (let n = 0; n < p.options; n++) {
       if (p.kind === "card") options.push({ card: Shop.packCard(p), taken: false });
@@ -84,8 +91,24 @@ const Shop = {
         if (j) options.push({ joker: j.id, taken: false });
       }
     }
-    s.pack = { ...p, options, picksLeft: p.picks, after };
-    s.phase = "pack";
+    return options;
+  },
+
+  // A fight's prize can be rerolled (new options, same picks left) for prizeRerollCost,
+  // or free with the free rerolls a joker gives. Returns the cost, or null if you can't.
+  prizeRerollCost() {
+    const p = Game.state.pack;
+    if (p?.after !== "fight" || p.picksLeft <= 0) return null;
+    return p.freeRerolls > 0 ? 0 : window.SETTRY_CONFIG.prizeRerollCost;
+  },
+
+  rerollPrize() {
+    const s = Game.state;
+    const cost = Shop.prizeRerollCost();
+    if (cost === null || !Game.canSpend(cost)) return;
+    if (cost) s.money -= cost;
+    else s.pack.freeRerolls--;
+    s.pack.options = Shop.packOptions(s.pack);
   },
 
   // A random card for a pack. Numbers 1 to 4 like starting decks; with deckLimited, only cards

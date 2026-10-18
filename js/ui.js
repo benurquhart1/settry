@@ -63,7 +63,7 @@ function handBox(hand, shown) {
   }
   const base = window.SETTRY_HANDS[hand.id].points;
   const points = shown ? shown.points : hand.points;
-  const mult = shown ? shown.mult : hand.mult;
+  const mult = Math.round((shown ? shown.mult : hand.mult) * 100) / 100;
   const total = shown && !shown.done ? "" : ` = ${hand.total}`;
   const enhs = window.SETTRY_ENHANCEMENTS;
   const cardLines = [
@@ -170,6 +170,9 @@ function renderRound() {
   $("info").innerHTML = `Score <b>${s.score}</b> / ${s.target}<br>
     Hands left ${s.playsLeft} · Discards left ${s.discardsLeft}<br>
     Draw pile ${s.pile.length}`;
+  const peek = Game.peek();
+  $("peek").hidden = !peek.length;
+  $("peek").innerHTML = peek.length ? `<span class="hint">Next in the draw pile:</span> ${peek.map((c) => `<div class="card mini" title="${c.id}">${cardSvg(c)}</div>`).join("")}` : "";
   $("msg").textContent = s.message;
   $("play").disabled = animating || !Game.canPlay();
   $("discard").disabled = animating || !Game.canDiscard();
@@ -199,9 +202,9 @@ $("play").onclick = async () => {
   const slots = $("picked").querySelectorAll(".card");
   $("hand-box").innerHTML = handBox(hand, { points: window.SETTRY_HANDS[hand.id].points, mult: hand.baseMult });
   await wait(stepMs);
-  for (const [n, st] of hand.steps.entries()) {
-    slots[n].classList.add("scoring");
-    if (st.label) slots[n].querySelector(".add").textContent += ` ${st.label}`;
+  for (const st of hand.steps) {
+    slots[st.index].classList.add("scoring");
+    if (st.label) slots[st.index].querySelector(".add").textContent += ` ${st.label}`;
     $("hand-box").innerHTML = handBox(hand, { points: st.points, mult: st.mult });
     await wait(stepMs);
   }
@@ -270,12 +273,17 @@ function renderPack() {
       ${o.card?.mods || o.card?.enh ? `<small>${[...(o.card.mods || []).map((m) => window.SETTRY_MODIFIERS[m].name),
         ...(o.card.enh ? [window.SETTRY_ENHANCEMENTS[o.card.enh].name] : [])].join(", ")}</small>` : ""}
       ${o.joker ? `<small>${rarityLabel(o.joker)}</small>` : ""}</div>`).join("");
+  const cost = Shop.prizeRerollCost();
+  $("reroll-prize").hidden = cost === null;
+  $("reroll-prize").textContent = cost === 0 ? `Reroll free (${p.freeRerolls} left)` : `Reroll $${cost}`;
+  $("reroll-prize").disabled = cost === null || !Game.canSpend(cost);
 }
 
 $("cash-out").onclick = () => { Game.cashOut(); render(); };
 $("reroll").onclick = () => { Shop.reroll(); render(); };
 $("next-round").onclick = () => { Game.leaveShop(); render(); };
 $("endless").onclick = () => { Game.goEndless(); render(); };
+$("reroll-prize").onclick = () => { Shop.rerollPrize(); render(); };
 $("skip-pack").onclick = () => { Shop.closePack(); render(); };
 $("game").addEventListener("click", (e) => {
   const b = e.target.closest("button");

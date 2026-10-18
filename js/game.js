@@ -23,6 +23,8 @@ const Game = {
       fightNumber: 0,                         // the fight being chosen or played, from 1
       endless: false,                         // true once you keep going after the last fight
       timesPlayed: {},                        // hand id -> times played this run
+      // Run totals some jokers use (Snowball, Compost, Fortune Teller, Streak, Collector, Veteran).
+      stats: { handsPlayed: 0, cardsDiscarded: 0, charmsUsed: 0, streak: 0, set4Played: 0, veteran: 1 },
       phase: "choose",                        // choose, round, cashout, shop, pack, lost, won
     };
     Game.nextFight();
@@ -62,6 +64,7 @@ const Game = {
     s.choices = kinds.map((k, i) => ({
       name: names[i],
       boss,
+      lower: !boss && i === 0,                // the lower-reward opponent (for Underdog)
       reward: k.reward,
       prize: boss ? null : prizes[i],
       shopModifier: boss ? prizes[i] : null,
@@ -117,6 +120,7 @@ const Game = {
       playsLeft: setting("plays"),
       discardsLeft: setting("discards"),
       firstDiscardDone: false,                // for jokers that act on the round's first discard
+      handsThisFight: 0,
       message: [...added, ...charms].join(" "),
     });
   },
@@ -132,11 +136,12 @@ const Game = {
       { label: `${s.playsLeft} unused hand${s.playsLeft === 1 ? "" : "s"}`, amount: s.playsLeft * cfg.moneyPerHandLeft },
     ].filter((l) => l.amount > 0);
     let money = s.money + lines.reduce((t, l) => t + l.amount, 0);
-    for (const id of s.jokers) {
-      const j = Jokers.byId(id);
+    const counts = { discardsLeft: s.discardsLeft, when: { lowerReward: !!s.fight.lower, firstHandWin: s.handsThisFight === 1 } };
+    for (const j of Jokers.effects(s.jokers)) {
       const e = j.effect;
       let amount = 0;
       let label = j.name;
+      if (e.type === "cashMoney" && (!e.when || counts.when[e.when])) amount = (e.amount ?? counts[e.per]) * (e.each ?? 1);
       if (e.type === "interest" && money > 0) {
         amount = Math.floor(money * e.rate);
         if (e.max !== null) amount = Math.min(e.max, amount);
@@ -241,7 +246,19 @@ const Game = {
 
   scoreContext() {
     const s = Game.state;
-    return { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards(), scores: Game.scores };
+    return { jokers: s.jokers, timesPlayed: s.timesPlayed, held: Game.heldCards(), scores: Game.scores,
+      rules: Game.rules(), pile: s.pile.length, firstHand: s.handsThisFight === 0, lastHand: s.playsLeft === 1, stats: s.stats };
+  },
+
+  // How the held jokers bend the rules (see Jokers.rules).
+  rules() {
+    return Jokers.rules(Game.state.jokers);
+  },
+
+  // The top of the draw pile that Scout jokers let you see.
+  peek() {
+    const s = Game.state;
+    return s.pile.slice(0, Jokers.total(s.jokers, "scout"));
   },
 
   // Board cards that are not selected (Steel cards work from here).
@@ -278,7 +295,23 @@ const Game = {
     s.money += hand.money;
     s.timesPlayed[hand.id] = (s.timesPlayed[hand.id] || 0) + 1;
     s.playsLeft--;
+    s.handsThisFight++;
+    s.stats.handsPlayed++;
+    if (hand.id === "set4") s.stats.set4Played++;
+    s.stats.veteran = Math.max(1, Math.round((s.stats.veteran - 1) * 10) / 10);
     s.message = `${hand.name}: ${hand.points} × ${hand.mult} = ${hand.total}` + (hand.money ? ` · +$${hand.money}` : "");
+    // Chances after a hand (Grand Slam, Apprentice), rolled with the seed.
+    for (const j of Jokers.has(s.jokers, "afterHand")) {
+      const e = j.effect;
+      if (e.when === "set4" && hand.id !== "set4") continue;
+      if (s.rng.luck() >= e.chance) continue;
+      if (e.give === "hand") { s.playsLeft++; s.message += ` · ${j.name}: +1 hand`; }
+      if (e.give === "charm" && Consumables.hasRoom()) {
+        const c = Consumables.roll(s.rng.luck);
+        s.consumables.push({ id: c.id, negative: false });
+        s.message += ` · ${j.name}: ${c.name}`;
+      }
+    }
     // Broken Glass cards leave the deck for good.
     if (hand.broken.length) {
       s.runDeck = s.runDeck.filter((c) => !hand.broken.includes(c.uid));
@@ -292,6 +325,8 @@ const Game = {
     const s = Game.state;
     if (!Game.canDiscard()) return;
     s.discardsLeft--;
+    s.stats.cardsDiscarded += s.selected.length;
+    s.stats.veteran = Math.round((s.stats.veteran + 0.1) * 10) / 10;
     s.message = `Discarded ${s.selected.length}.`;
     let removed = [];
     if (!s.firstDiscardDone && s.selected.length === 1) {
@@ -336,6 +371,7 @@ const Game = {
     const s = Game.state;
     if (s.score >= s.target) {
       s.phase = "cashout";
+      s.stats.streak = s.playsLeft > 0 ? s.stats.streak + 1 : 0;
       s.payout = Game.earnings();
     } else if (s.playsLeft === 0) s.phase = "lost";
   },

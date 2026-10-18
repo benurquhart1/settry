@@ -11,6 +11,7 @@ window.SETTRY_CONFIG = {
   rerollStart: 4,      // first reroll each shop costs this...
   rerollStep: 1,       // ...and each reroll after costs this much more
   jokerPrices: { common: 4, uncommon: 6, rare: 10, unique: 16, legendary: 20 },
+  prizeRerollCost: 5,  // reroll a fight's prize pack (ben, 2026-10-18); a joker gives 1 free per fight
   ignoreUnlocks: true, // until saves exist, every joker with an effect can show up in shops and packs
 
   // Round

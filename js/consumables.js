@@ -59,6 +59,7 @@ const Consumables = {
       note = ` Created ${Consumables.byId(s.lastConsumable).name}.`;
     }
     if (c.action !== "echo") s.lastConsumable = c.id;
+    s.stats.charmsUsed++;
     s.message = `Used ${c.name}.${note}`;
   },
 

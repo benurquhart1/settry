@@ -43,16 +43,38 @@ const Deck = {
   // A set (3 or 4 cards): for each attribute the cards are all the same or all different
   // (or, with allowPairs, split into equal pairs such as A A B B).
   // A wild card (see data/modifiers.js) counts as whatever value its attribute needs.
-  isSet(cards) {
+  // `rules` (from Jokers.rules) can bend this: interchangeable values, ignored attributes.
+  isSet(cards, rules = {}) {
     return Object.keys(window.SETTRY_ATTRIBUTES).every((k) => {
+      const options = cards.map((c) => Deck.options(c, k, rules));
+      if (Deck.canBeSame(options) || Deck.canBeDifferent(options)) return true;
       const tally = {};
       for (const c of cards) if (!Deck.isWild(c, k)) tally[c[k]] = (tally[c[k]] || 0) + 1;
       const counts = Object.values(tally);
-      if (counts.length <= 1) return true;                         // all same
-      if (counts.every((v) => v === 1)) return true;               // all different
       return window.SETTRY_CONFIG.allowPairs && cards.length % 2 === 0 &&
         counts.every((v) => v <= 2) && counts.length <= cards.length / 2;
     });
+  },
+
+  // The values a card can count as for one attribute: every value if it's wild or the
+  // attribute is ignored (Blur), its pair if a joker makes values interchangeable
+  // (Shape Shifter, Colorblind), otherwise just its own.
+  options(card, attribute, rules = {}) {
+    if (Deck.isWild(card, attribute) || (rules.ignore || []).includes(attribute)) return window.SETTRY_ATTRIBUTES[attribute];
+    const pair = (rules.interchange?.[attribute] || []).find((p) => p.includes(card[attribute]));
+    return pair || [card[attribute]];
+  },
+
+  // Can every card take the same value?
+  canBeSame(options) {
+    return options.length === 0 || options[0].some((v) => options.every((o) => o.includes(v)));
+  },
+
+  // Can every card take a different value?
+  canBeDifferent(options, taken = []) {
+    if (!options.length) return true;
+    const [first, ...rest] = options;
+    return first.some((v) => !taken.includes(v) && Deck.canBeDifferent(rest, [...taken, v]));
   },
 
   isWild(card, attribute) {

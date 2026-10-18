@@ -70,7 +70,7 @@ A run is a ladder of **20 fights**, then endless mode (ben, 2026-10-18, moving a
 | Regular | two of: $3, $5, $8 (always different) | as shown | base × 1, × 1.3, × 1.7 |
 | Boss | two bosses with different modifiers | $10 | base × 2 (Giant × 1.5 more) |
 
-**Prizes** (ben, 2026-10-18). On top of the money, each regular opponent offers a prize from the reward pool for its place in the group of 4 (`rewardPools` in `data/fights.js`). The two opponents always offer different prizes. Winning opens the prize like a pack: choose from it, or skip.
+**Prizes** (ben, 2026-10-18). On top of the money, each regular opponent offers a prize from the reward pool for its place in the group of 4 (`rewardPools` in `data/fights.js`). The two opponents always offer different prizes. Winning opens the prize like a pack: choose from it, or skip. You can **reroll** a prize for new options for $5 (`prizeRerollCost`; ben, 2026-10-18), and the Second Look joker gives one free reroll each fight.
 "Jokers" means jokers rolled with the normal drop rates. Card prizes have numbers 1 to 4. "Deck cards" only include cards your starting deck could have. Modified cards have a 30% chance (boosted cards: always) of one wild or enhancement, such as Steel.
 
 | Fight in the group | Prize pool (choose X of Y) |
@@ -272,7 +272,46 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Rare | Gambler | At cash out: 80% chance your money ×1.3, 20% chance it drops to $0 (only when above $0). |
 | Rare | Loan Shark | You can go into debt (see Debt above). At cash out, pay 20% interest on your debt. |
 | Rare | High Five | Each 5 played gives +5 mult. |
+| Common | Lowball | Each 1 played gives +3 mult. |
+| Common | Number Line | +20 points if the played numbers are in a row, like 2-3-4 (3 or more cards, no repeats). |
+| Common | Snowball | +2 points for every hand played this run (including this one). |
+| Common | Deep Pile | +2 points for every card left in your draw pile. |
+| Common | Scout | See the next 3 cards in your draw pile. |
+| Common | Tip Jar | Earn $1 for each unused discard when you win a fight. |
+| Common | Underdog | +$4 when you beat the lower-reward opponent. |
+| Common | Speedrun | +$3 when you win a fight with your first hand. |
+| Uncommon | Apprentice | 1 in 4 chance to create a random charm when you play a set of 4 (needs a free charm slot). |
+| Uncommon | Collector | +1 mult for each set of 4 played this run. |
+| Uncommon | Compost | +1 point for each card discarded this run. |
+| Uncommon | Curtain Call | The last card in each hand scores twice. |
+| Uncommon | Fortune Teller | +1 mult for each charm used this run. |
+| Uncommon | Last Stand | ×3 mult on your last hand of a fight. |
+| Uncommon | Lucky Stars | Lucky cards are twice as likely to pay out. |
+| Uncommon | Monochrome | ×2 mult if every played card is the same color (2 or more cards). |
+| Uncommon | Opening Act | ×2 mult on the first hand of each fight. |
+| Uncommon | Long Game | +1 mult for every 4 cards left in your draw pile. |
+| Uncommon | Purist | ×2 mult if no played card has a wild or enhancement. |
+| Uncommon | Quartet | ×3 mult when you play a set of 4. |
+| Uncommon | Rainbow Road | +10 mult if every played card is a different color (3 or more cards). |
+| Uncommon | Streak | +2 mult for each fight in a row won with hands to spare. Resets if you win on your last hand. |
+| Uncommon | Twin Peaks | +8 mult if the hand is a pair or contains one (two pair, three/four/five of a kind, full house). |
+| Uncommon | Wild Child | +3 mult for each wild attribute among the played cards. |
+| Uncommon | Second Look | One free prize reroll each fight. |
+| Rare | Blur | Shading is ignored for sets and of-a-kind hands. |
+| Rare | Colorblind | Red and green are interchangeable, and so are blue and black: each card can count as either color of its pair. |
+| Rare | Shape Shifter | Hearts and diamonds are interchangeable, and so are spades and clubs. |
+| Rare | Crowded Table | +2 cards on the board, but -1 hand each fight. |
+| Rare | Glassblower | Glass cards give ×3 mult instead of ×2. |
+| Rare | Grand Slam | Each time you play a set of 4, 50% chance to gain 1 hand. |
+| Rare | Lone Wolf | High card gets ×4 mult. |
+| Rare | Lookalike | Cards that differ in only one attribute count as identical for of-a-kind hands. |
+| Rare | Matchmaker | ×2 mult for two pair and full house. |
+| Rare | Mimic | Copies the effect of the joker to its right. |
+| Rare | Spotlight | The first card you select scores twice. |
+| Rare | Veteran | Gains ×0.1 mult for every discard, loses ×1 for every hand played (never below ×1). |
+| Rare | Last Call | ×5 mult if your draw pile is empty. |
 | Unique | Recycle | Played and discarded cards go straight back into the draw pile (at random spots). Unlock: run out of cards in the draw pile. |
+| Unique | Set Master | Sets of 3 score (and count) as sets of 4. |
 | Unique | Phantom | At the start of each fight, add a negative copy of a random charm. Negative charms don't take up a charm slot. |
 
 **Deck jokers** (common, ben 2026-10-18): one per starting deck, unlocked by beating that deck.
@@ -287,6 +326,8 @@ Many jokers will need to be unlocked first (`unlocked` in the data; all are unlo
 | Spade Joker | TBD. |
 | Heart Joker | TBD. |
 | Club Joker | TBD. |
+
+"This run" counts from the start of the run, not from when you got the joker.
 
 Chance effects are rolled with the game's seed, once, when the hand is played; the preview just shows the odds.
 A wild card counts as every color (or suit) for these jokers.

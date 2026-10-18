@@ -122,3 +122,5 @@ dialog { max-width: 90vw; }
 .charm.negative { border-color: #222; background: #eceff1; }
 .charm.negative .charm-art { background: #222; }
 .charm.negative .charm-name::after { content: " (negative)"; font-weight: normal; color: #555; }
+.peek { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; margin: 4px 0; }
+.card.mini { width: 45px; height: 56px; padding: 2px; border-width: 1px; }
