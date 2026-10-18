@@ -27,10 +27,10 @@
 
 window.SETTRY_JOKER_RARITIES = {
   // Chance a dropped joker is this rarity. Legendary jokers never drop.
-  common:    { name: "Common",    weight: 60, color: "#607d8b" },
-  uncommon:  { name: "Uncommon",  weight: 25, color: "#2e7d32" },
-  rare:      { name: "Rare",      weight: 12, color: "#c62828" },
-  unique:    { name: "Unique",    weight: 3,  color: "#6a1b9a" },
+  common:    { name: "Common",    weight: 70, color: "#607d8b" },
+  uncommon:  { name: "Uncommon",  weight: 24, color: "#2e7d32" },
+  rare:      { name: "Rare",      weight: 5,  color: "#c62828" },
+  unique:    { name: "Unique",    weight: 1,  color: "#6a1b9a" },
   legendary: { name: "Legendary", weight: 0,  color: "#b8860b" },
 };
 

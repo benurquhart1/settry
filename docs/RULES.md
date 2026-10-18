@@ -237,7 +237,7 @@ A joker card has art on the top half, its name in the middle and a text box at t
 You start with 2 joker slots and gain more from bosses (see The run). Scoring jokers apply **left to right**, after the cards have added their points.
 Buy them in the shop or find them in Buffoon packs. You can also pick test jokers on the start menu to start a run with.
 
-**Drop rates** (by rarity): common 60%, uncommon 25%, rare 12%, unique 3%. Legendary jokers never drop.
+**Drop rates** (by rarity): common 70%, uncommon 24%, rare 5%, unique 1% (ben, 2026-10-18; Balatro is 70/25/5). Legendary jokers never drop.
 Many jokers will need to be unlocked first (`unlocked` in the data; all are unlocked for now).
 
 **Words used on jokers**
