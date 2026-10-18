@@ -15,7 +15,7 @@ window.SETTRY_CONFIG = {
 
   // Round
   boardSize: 12,       // cards dealt face up (4 across, 3 down); ben trying 12 instead of 16
-  minPlay: 2,          // fewest cards one play can use
+  minPlay: 1,          // fewest cards one play can use (1 = high card)
   maxPlay: 4,          // most cards one play can use (the Fifth Card joker raises it to 5)
   plays: 4,            // hands per round
   discards: 2,         // discards per round

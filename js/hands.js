@@ -27,6 +27,7 @@ const Hands = {
 
   // Does exactly this group of cards make the hand?
   checks: {
+    highCard: (c) => c.length === 1,
     pair: (c) => c.length === 2 && Hands.identical(c),
     threeKind: (c) => c.length === 3 && Hands.identical(c),
     fourKind: (c) => c.length === 4 && Hands.identical(c),

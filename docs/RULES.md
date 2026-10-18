@@ -19,7 +19,7 @@ Starting decks and Standard packs only use numbers 1 to 4 (256 cards, `SETTRY_ST
 
 ## Hands
 
-Each play uses 2 to 4 cards from the board (5 with the Fifth Card joker). The play scores its best hand, Balatro-style:
+Each play uses 1 to 4 cards from the board (5 with the Fifth Card joker). The play scores its best hand, Balatro-style:
 
 1. Start with the hand's points and mult (table below).
 2. Each played card adds its own points, one at a time, **in the order you selected them**: a card adds its number (1 to 5), then applies its enhancement, if it has one.
@@ -35,6 +35,7 @@ The list and numbers live in `data/hands.js`; how each is recognized is in `js/h
 
 | Hand | Cards | Points | Mult | Score |
 |------|-------|--------|------|-------|
+| High card | any 1 card | 5 | 1 | 5 |
 | Pair | 2 identical cards | 10 | 2 | 20 |
 | Set of 3 | 3 that are part of a full set | 10 | 2 | 20 |
 | Three of a kind | 3 identical cards | 20 | 3 | 60 |
@@ -217,12 +218,12 @@ All randomness must go through `js/rng.js`; never call `Math.random()` for game 
 | Setting | Value | Config key |
 |---------|-------|------------|
 | Board | 12 cards, 4 across and 3 down (was 16; ben trying 12, 2026-10-18) | `boardSize` |
-| Play size | 2 to 4 cards (5 with the Fifth Card joker) | `minPlay`, `maxPlay` |
+| Play size | 1 to 4 cards (5 with the Fifth Card joker) | `minPlay`, `maxPlay` |
 | Hands | 4 per round | `plays` |
 | Discards | 2 per round, up to 4 cards each | `discards`, `maxDiscardSize` |
 
 1. Your deck is shuffled (by the seed) into a draw pile, and 12 cards are dealt face up.
-2. Select 2 to 4 cards (5 with Fifth Card). If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
+2. Select 1 to 4 cards (5 with Fifth Card). If they form a hand, the box on the right shows it with its points and mult. Press **Play hand** to score it.
 3. Or select 1 to 4 cards and press **Discard** to swap them.
 4. Played and discarded cards are replaced from the draw pile. When the pile is empty, their spots stay empty.
 5. Reach the fight's target within 4 hands to win it.
@@ -240,7 +241,7 @@ Buy them in the shop or find them in Buffoon packs. You can also pick test joker
 Many jokers will need to be unlocked first (`unlocked` in the data; all are unlocked for now).
 
 **Words used on jokers**
-- A **difference** is, in a set, each attribute that is all different; in an of-a-kind hand, each group of identical cards (a pair has 1, two pair has 2).
+- A **difference** is, in a set, each attribute that is all different; in an of-a-kind hand, each group of identical cards (a pair has 1, two pair has 2; a high card counts as 1 difference and 1 match).
 - A **match** is, in a set, each attribute that is all the same; in an of-a-kind hand, each card (a pair has 2, three of a kind has 3).
 
 | Rarity | Joker | Effect |
