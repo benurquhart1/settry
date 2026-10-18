@@ -5,5 +5,5 @@ body { font-family: system-ui, sans-serif; background: #f4f4f4; color: #111; mar
 .card svg { width: 100%; height: 100%; }
 .actions button { font-size: 16px; margin-right: 8px; padding: 6px 12px; }
 #msg { min-height: 1.2em; font-weight: bold; }
-#gallery { display: grid; grid-template-columns: repeat(16, 60px); gap: 4px; }
-#gallery .card { width: 60px; height: 75px; padding: 2px; cursor: default; }
+.gallery { display: grid; grid-template-columns: repeat(16, 60px); gap: 4px; }
+.gallery .card { width: 60px; height: 75px; padding: 2px; cursor: default; }

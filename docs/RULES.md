@@ -35,7 +35,28 @@ With two pairs allowed, a random 12-card board has a set about 91% of the time a
 Keeping 3-card sets instead would make them far too easy (about 8 per 12-card board).
 `setSize` and `allowPairs` in `data/config.js` switch between these rules.
 
-## A run (current version)
+## The run (planned, not built yet)
+
+A run plays like Balatro (ben, 2026-10-18):
+
+- The run is a series of **antes**. Each ante has rounds you beat by scoring past a target.
+- Between rounds there is a **shop**.
+- Each ante ends with a **boss** round that plays a bit differently.
+- Beating a round also gives a **reward** of its own, on top of reaching the shop.
+
+Still to decide: how a set scores, the targets per ante, what rewards and the shop offer, and the boss rules.
+
+## Card modifications
+
+Modifications live in `data/modifiers.js`. A card lists the ones it has in `card.mods`.
+
+| Modification | Effect | Looks like |
+|--------------|--------|------------|
+| Wild suit | Counts as any shape when checking a set. | One shape stitched from a quarter of each suit: heart top left, club top right, spade bottom left, diamond bottom right. |
+
+How a card gets a modification (shop, reward, joker) is still to decide. `gallery.html` shows the wild suit in every count, shading and color.
+
+## The round (current version)
 
 | Setting | Value | Config key |
 |---------|-------|------------|

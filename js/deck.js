@@ -26,16 +26,23 @@ const Deck = {
 
   // A set: for each attribute the cards are all the same, all different,
   // or (with allowPairs) split into equal pairs such as A A B B.
+  // A wild card (see data/modifiers.js) counts as whatever value its attribute needs.
   isSet(cards) {
     const cfg = window.SETTRY_CONFIG;
     if (cards.length !== cfg.setSize) return false;
     return Object.keys(window.SETTRY_ATTRIBUTES).every((k) => {
       const tally = {};
-      for (const c of cards) tally[c[k]] = (tally[c[k]] || 0) + 1;
-      const n = Object.keys(tally).length;
-      if (n === 1 || n === cards.length) return true;
-      return cfg.allowPairs && Object.values(tally).every((v) => v === 2);
+      for (const c of cards) if (!Deck.isWild(c, k)) tally[c[k]] = (tally[c[k]] || 0) + 1;
+      const counts = Object.values(tally);
+      if (counts.length <= 1) return true;                         // all same
+      if (counts.every((v) => v === 1)) return true;               // all different
+      return cfg.allowPairs && cards.length % 2 === 0 &&           // two pairs
+        counts.every((v) => v <= 2) && counts.length <= cards.length / 2;
     });
+  },
+
+  isWild(card, attribute) {
+    return (card.mods || []).some((m) => window.SETTRY_MODIFIERS[m]?.wild === attribute);
   },
 
   findSets(cards) {

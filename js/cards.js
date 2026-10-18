@@ -19,15 +19,26 @@ function addPatterns() {
   const defs = Object.entries(window.SETTRY_COLORS).map(([name, hex]) => `
     <pattern id="striped-${name}" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="1.6" height="4" fill="${hex}"/></pattern>
     <pattern id="checkered-${name}" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="${hex}"/><rect x="3" y="3" width="3" height="3" fill="${hex}"/></pattern>`);
+  // Quarters of the 24x24 symbol box, for shapes stitched together from several suits.
+  const quarters = { topLeft: [0, 0], topRight: [12, 0], bottomLeft: [0, 12], bottomRight: [12, 12] };
+  for (const [q, [x, y]] of Object.entries(quarters))
+    defs.push(`<clipPath id="q-${q}"><rect x="${x}" y="${y}" width="12" height="12"/></clipPath>`);
   document.body.insertAdjacentHTML("afterbegin",
     `<svg width="0" height="0" style="position:absolute"><defs>${defs.join("")}</defs></svg>`);
+}
+
+// The shape markup for a card: its own suit, or a stitched shape when its suit is wild.
+function shapeSvg(card) {
+  const wild = (card.mods || []).map((m) => window.SETTRY_MODIFIERS[m]).find((m) => m?.wild === "shape");
+  if (!wild) return SHAPES[card.shape];
+  return Object.entries(wild.draw).map(([q, suit]) => `<g clip-path="url(#q-${q})">${SHAPES[suit]}</g>`).join("");
 }
 
 function cardSvg(card) {
   const col = window.SETTRY_COLORS[card.color];
   const fill = card.shading === "solid" ? col : card.shading === "empty" ? "none" : `url(#${card.shading}-${card.color})`;
   const symbols = LAYOUTS[card.count].map(([x, y, scale = 1]) =>
-    `<g transform="translate(${x} ${y}) scale(${scale})" fill="${fill}" stroke="${col}" stroke-width="${1.5 / scale}" stroke-linejoin="round">${SHAPES[card.shape]}</g>`);
+    `<g transform="translate(${x} ${y}) scale(${scale})" fill="${fill}" stroke="${col}" stroke-width="${1.5 / scale}" stroke-linejoin="round">${shapeSvg(card)}</g>`);
   return `<svg viewBox="0 0 80 100">${symbols.join("")}</svg>`;
 }
 
