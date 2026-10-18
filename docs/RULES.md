@@ -17,23 +17,32 @@ Each card has four attributes, each with four values:
 
 Every combination is one card, so the full deck is 4 × 4 × 4 × 4 = 256 cards. Open `gallery.html` to see them all.
 
-## What counts as a set
+## Hands
 
-A set is **4 cards**. For each of the four attributes, the 4 cards must be one of:
+Each play uses 2 to 5 cards from your hand. The play scores its best hand: **points × mult**.
+Cards that aren't part of that hand are played but don't add anything.
+The list and numbers live in `data/hands.js`; how each is recognized is in `js/hands.js`.
 
-- all the same (4 red),
-- all different (red, green, blue, black), or
-- two pairs (2 red and 2 blue).
+| Hand | Cards | Points | Mult | Score |
+|------|-------|--------|------|-------|
+| Pair | 2 with the same number | 10 | 2 | 20 |
+| Set of 3 | 3 that are part of a full set | 10 | 2 | 20 |
+| Three of a kind | 3 with the same number | 20 | 3 | 60 |
+| Set of 4 | a full set | 20 | 3 | 60 |
+| Two pair | 2 + 2 with the same number | 30 | 2 | 60 |
+| Full house | 3 + 2 with the same number | 40 | 4 | 160 |
+| Four of a kind | 4 with the same number | 50 | 5 | 250 |
+| Five of a kind | 5 with the same number | 100 | 8 | 800 |
 
-Anything else (3 of one value and 1 of another, or a pair plus two singles) breaks the set.
-For example: 1 red solid heart, 2 red solid spades, 3 blue solid hearts and 4 blue solid spades is a set (count all different, shape two pairs, shading all same, color two pairs).
+"Of a kind" means the same **number** (1 to 4 symbols), like ranks in poker.
 
-Any 3 cards have exactly one 4th card that completes them, just like any 2 cards in classic Set have exactly one 3rd.
+**Sets.** For each of the four attributes (number, shape, shading, color), the cards are all the same or all different.
+A set of 4 is a full set; a set of 3 is three cards that follow the same rule.
+(The earlier "two pairs also count" set rule is off: `allowPairs` in `data/config.js`.)
 
-Why this rule (2026-10-18): with only "all same or all different", a 12-card board had a 4-card set just 6% of the time.
-With two pairs allowed, a random 12-card board has a set about 91% of the time and holds about 2 on average, close to classic Set (about 97% and 2.8).
-Keeping 3-card sets instead would make them far too easy (about 8 per 12-card board).
-`setSize` and `allowPairs` in `data/config.js` switch between these rules.
+**Wild cards** count as any value of their attribute. A wild number helps both sets and "of a kind" hands.
+
+More hands, including a set of 5, are to come.
 
 ## The run (planned, not built yet)
 
@@ -44,7 +53,7 @@ A run plays like Balatro (ben, 2026-10-18):
 - Each ante ends with a **boss** round that plays a bit differently.
 - Beating a round also gives a **reward** of its own, on top of reaching the shop.
 
-Still to decide: how a set scores, the targets per ante, what rewards and the shop offer, and the boss rules.
+Still to decide: the targets per ante, what rewards and the shop offer, and the boss rules.
 
 ## Card modifications
 
@@ -63,18 +72,18 @@ How a card gets a modification (shop, reward, joker) is still to decide. `galler
 
 | Setting | Value | Config key |
 |---------|-------|------------|
-| Run deck | 30 cards drawn at random from the 81 | `runDeckSize` |
-| Board | 12 cards face up | `boardSize` |
-| Set size | 4 cards, pairs allowed | `setSize`, `allowPairs` |
-| Goal | make 4 sets | `setsToWin` |
-| Discards | 2 per round | `discards` |
-| Discard size | up to 4 cards each | `maxDiscardSize` |
+| Run deck | 30 cards drawn at random from the 256 | `runDeckSize` |
+| Hand | 12 cards | `handSize` |
+| Play size | 2 to 5 cards | `minPlay`, `maxPlay` |
+| Plays | 4 per round | `plays` |
+| Target | 150 points (placeholder) | `roundTarget` |
+| Discards | 2 per round, up to 4 cards each | `discards`, `maxDiscardSize` |
 
 1. Shuffle the 256 cards and take 30. That is your deck for the run.
-2. Deal 12 face up.
-3. Select 4 cards and press **Play set**. If they form a set, it counts and the 4 cards are replaced from the deck. If not, nothing happens.
-4. Or select 1 to 4 cards and press **Discard** to swap them for new cards from the deck. You have 2 discards.
-5. Make 4 sets to win. You lose when the board has no set and you have no discards left (or the deck is empty).
+2. Draw a hand of 12.
+3. Select 2 to 5 cards and press **Play**. The game shows which hand they make before you play. Played cards are replaced from the deck.
+4. Or select 1 to 4 cards and press **Discard** to swap them.
+5. Reach the target within 4 plays to win the round.
 
 There is only one round so far, and one player.
 
@@ -84,8 +93,7 @@ Jokers come in four rarities: **common, uncommon, rare, legendary**. None are de
 
 ## Open questions
 
-- With 4 sets of 4 cards to make, a 30-card deck leaves little room for discards. Is 30 still right?
-- Should a wrong set cost anything (a discard, points, a life)?
-- Scoring: is a round only win/lose, or do sets score points like Balatro hands?
+- Do cards add their own points (like Balatro card chips), or does only the hand score?
+- Round targets per ante.
 - What happens between rounds (shop, adding/removing cards from the run deck)?
 - Multiplayer: does "each person" mean players take turns on one board, or each has their own?
